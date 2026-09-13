@@ -105,7 +105,7 @@ print add 2, 3
 
 ## 🏗 Architecture
 
-Lucy 0.9.x is built around a C++17 interpreter and a small runtime.
+Lucy 1.0 is built around a C++17 interpreter and a small runtime.
 
 ```text
 .lucy source
@@ -210,7 +210,7 @@ GitHub: [@nimacpp](https://github.com/nimacpp)
 
 <div align="center">
 
-### Lucy 0.9.1
+### Lucy 1.0
 
 **A small language, built from scratch.**
 
