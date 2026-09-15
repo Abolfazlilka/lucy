@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/lucy.dir/link.d CMakeFiles/lucy.dir/src/main.cpp.o CMakeFiles/lucy.dir/src/lucy.cpp.o CMakeFiles/lucy.dir/src/lexer.cpp.o CMakeFiles/lucy.dir/src/parser.cpp.o CMakeFiles/lucy.dir/src/runtime.cpp.o CMakeFiles/lucy.dir/src/value.cpp.o CMakeFiles/lucy.dir/src/phase2.cpp.o CMakeFiles/lucy.dir/src/repl.cpp.o -o lucy
