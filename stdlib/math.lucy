@@ -1,0 +1,111 @@
+# Mathematical helpers and convenience functions.
+class Math
+    def square(x)
+        return x * x
+    end
+
+    def cube(x)
+        return x * x * x
+    end
+
+    def clamp(x, low, high)
+        if x < low
+            return low
+        else if x > high
+            return high
+        end
+        return x
+    end
+
+    def even(x)
+        return x % 2 == 0
+    end
+
+    def odd(x)
+        return x % 2 != 0
+    end
+
+    def abs(x)
+        return abs(x)
+    end
+
+    def sqrt(x)
+        return sqrt(x)
+    end
+
+    def pow(x, y)
+        return pow(x, y)
+    end
+
+    def sin(x)
+        return sin(x)
+    end
+
+    def cos(x)
+        return cos(x)
+    end
+
+    def tan(x)
+        return tan(x)
+    end
+
+    def floor(x)
+        return floor(x)
+    end
+
+    def ceil(x)
+        return ceil(x)
+    end
+
+    def log(x)
+        return log(x)
+    end
+
+    def min(a, b)
+        return min(a, b)
+    end
+
+    def max(a, b)
+        return max(a, b)
+    end
+
+    def factorial(n)
+        if n < 0
+            throw "factorial expects a non-negative integer"
+        end
+        result = 1
+        i = 2
+        while i <= n
+            result *= i
+            i += 1
+        end
+        return result
+    end
+
+    def gcd(a, b)
+        a = abs(a)
+        b = abs(b)
+        while b != 0
+            remainder = a % b
+            a = b
+            b = remainder
+        end
+        return a
+    end
+
+    def lcm(a, b)
+        if a == 0 or b == 0
+            return 0
+        end
+        return int(abs((a / self.gcd(a, b)) * b))
+    end
+
+    def average(values)
+        if values.length() == 0
+            return nil
+        end
+        return sum(values) / values.length()
+    end
+end
+
+math = Math.new()

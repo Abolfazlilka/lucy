@@ -1,0 +1,36 @@
+# CMake generated Testfile for 
+# Source directory: /mnt/c/Users/jinx/Downloads/lucy-1.0.0-release
+# Build directory: /mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install
+# 
+# This file includes the relevant testing commands required for 
+# testing this directory and lists subdirectories to be tested as well.
+add_test(smoke "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/smoke.lucy")
+set_tests_properties(smoke PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(features "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/features.lucy")
+set_tests_properties(features PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(advanced "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/advanced.lucy")
+set_tests_properties(advanced PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(classes "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/classes.lucy")
+set_tests_properties(classes PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(maps "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/maps.lucy")
+set_tests_properties(maps PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(exceptions "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/exceptions.lucy")
+set_tests_properties(exceptions PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(strings "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/strings.lucy")
+set_tests_properties(strings PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(stdlib "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/stdlib.lucy")
+set_tests_properties(stdlib PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(features2 "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/features2.lucy")
+set_tests_properties(features2 PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(help "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/help.lucy")
+set_tests_properties(help PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(fs "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/fs.lucy")
+set_tests_properties(fs PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(phase1 "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/phase1.lucy")
+set_tests_properties(phase1 PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(phase2 "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/phase2.lucy")
+set_tests_properties(phase2 PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(repl "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/repl.lucy")
+set_tests_properties(repl PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;45;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")
+add_test(argv "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/lucy" "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/tests/argv.lucy" "alpha" "42" "hello world")
+set_tests_properties(argv PROPERTIES  ENVIRONMENT "LUCY_PATH=/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/stdlib" _BACKTRACE_TRIPLES "/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;48;add_test;/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/CMakeLists.txt;0;")

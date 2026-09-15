@@ -1,0 +1,2 @@
+result = `echo Lucy shell command`
+print result

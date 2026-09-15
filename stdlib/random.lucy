@@ -1,0 +1,15 @@
+# Pseudo-random helpers.
+class Random
+    def integer(low, high)
+        return random_int(low, high)
+    end
+
+    def choice(items)
+        if items.length() == 0
+            return nil
+        end
+        return items[self.integer(0, items.length() - 1)]
+    end
+end
+
+random = Random.new()

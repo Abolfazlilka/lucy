@@ -1,0 +1,66 @@
+# Date and time helpers. Timestamps are Unix milliseconds.
+class DateTime
+    def initialize(timestamp)
+        self.timestamp = timestamp
+    end
+
+    def timestamp()
+        return self.timestamp
+    end
+
+    def format(pattern)
+        return __datetime_format(self.timestamp, pattern)
+    end
+
+    def parts()
+        return __datetime_parts(self.timestamp)
+    end
+
+    def year()
+        return self.parts().get("year")
+    end
+
+    def month()
+        return self.parts().get("month")
+    end
+
+    def day()
+        return self.parts().get("day")
+    end
+
+    def hour()
+        return self.parts().get("hour")
+    end
+
+    def minute()
+        return self.parts().get("minute")
+    end
+
+    def second()
+        return self.parts().get("second")
+    end
+
+    def weekday()
+        return self.parts().get("weekday")
+    end
+
+    def iso()
+        return self.format("%Y-%m-%dT%H:%M:%S")
+    end
+end
+
+class DateTimeModule
+    def now()
+        return DateTime.new(__datetime_now())
+    end
+
+    def from_timestamp(milliseconds)
+        return DateTime.new(__datetime_from_timestamp(milliseconds))
+    end
+
+    def format(milliseconds, pattern)
+        return __datetime_format(milliseconds, pattern)
+    end
+end
+
+datetime = DateTimeModule.new()

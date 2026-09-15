@@ -1,0 +1,12 @@
+class Counter
+    def initialize(value)
+        self.value = value
+    end
+    def increment()
+        self.value += 1
+        return self.value
+    end
+end
+
+counter = Counter.new(10)
+print counter.increment()

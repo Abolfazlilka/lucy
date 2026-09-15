@@ -1,0 +1,12 @@
+# HTTP client built on the host curl implementation.
+class HTTP
+    def get(url)
+        return __http_get(url)
+    end
+
+    def post(url, body = "")
+        return __http_post(url, body)
+    end
+end
+
+http = HTTP.new()

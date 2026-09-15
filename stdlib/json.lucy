@@ -1,0 +1,22 @@
+# JSON parsing and serialization.
+class JSON
+    def parse(text)
+        return __json_parse(text)
+    end
+
+    def stringify(value)
+        return __json_stringify(value)
+    end
+
+    def load(path)
+        import file
+        return self.parse(file.read(path))
+    end
+
+    def dump(path, value)
+        import file
+        return file.write(path, self.stringify(value))
+    end
+end
+
+json = JSON.new()

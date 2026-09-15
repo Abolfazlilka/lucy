@@ -1,0 +1,22 @@
+# CSV parsing and serialization.
+class CSV
+    def parse(text, delimiter = ",")
+        return __csv_parse(text, delimiter)
+    end
+
+    def stringify(rows, delimiter = ",")
+        return __csv_stringify(rows, delimiter)
+    end
+
+    def load(path, delimiter = ",")
+        import file
+        return self.parse(file.read(path), delimiter)
+    end
+
+    def dump(path, rows, delimiter = ",")
+        import file
+        return file.write(path, self.stringify(rows, delimiter))
+    end
+end
+
+csv = CSV.new()

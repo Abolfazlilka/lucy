@@ -1,0 +1,20 @@
+# Process execution helpers.
+class Process
+    def run(command)
+        return __process_run(command)
+    end
+
+    def capture(command)
+        return __process_capture(command)
+    end
+
+    def success(command)
+        return self.run(command).get("success")
+    end
+
+    def output(command)
+        return self.run(command).get("stdout")
+    end
+end
+
+process = Process.new()

@@ -1,0 +1,20 @@
+# Console input/output helpers.
+class IO
+    def print(values)
+        return print(values)
+    end
+
+    def write(text)
+        return __io_write(text)
+    end
+
+    def read(prompt = "")
+        return __io_read(prompt)
+    end
+
+    def ask(prompt)
+        return __io_read(prompt)
+    end
+end
+
+io = IO.new()

@@ -1,0 +1,11 @@
+user = {name: "Nima", age: 21}
+assert user.name == "Nima"
+user.city = "Birjand"
+assert user["city"] == "Birjand"
+assert user.has("age")
+user.set("active", true)
+assert user.get("active") == true
+assert len(user.keys()) == 4
+user.delete("age")
+assert !user.has("age")
+print "maps ok"

@@ -1,0 +1,10 @@
+assert ARGV.length() == 3
+assert ARGV[0] == "alpha"
+assert ARGV[1] == "42"
+assert ARGV[2] == "hello world"
+assert argv[0] == ARGV[0]
+
+import sys
+assert sys.argv()[1] == "42"
+
+print "argv ok"

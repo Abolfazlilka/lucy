@@ -1,0 +1,16 @@
+import math
+assert math.square(4) == 16
+import random
+assert random.integer(1, 1) == 1
+import string
+assert string.repeat("x", 3) == "xxx"
+import io
+assert io.ask != nil
+import file
+import dir
+import path
+import os
+assert dir.exists(".")
+assert path.extname("tests/stdlib.lucy") == ".lucy"
+assert os.platform() != nil
+print "stdlib ok"

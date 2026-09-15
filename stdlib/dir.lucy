@@ -1,0 +1,64 @@
+# Directory traversal and filesystem helpers.
+class Dir
+    def pwd()
+        return __dir_pwd()
+    end
+
+    def chdir(path)
+        return __dir_chdir(path)
+    end
+
+    def exists(path)
+        return __dir_exists(path)
+    end
+
+    def entries(path)
+        return __dir_entries(path)
+    end
+
+    def files(path)
+        return __dir_files(path)
+    end
+
+    def dirs(path)
+        return __dir_dirs(path)
+    end
+
+    def glob(pattern)
+        return __dir_glob(pattern)
+    end
+
+    def walk(path)
+        return __dir_walk(path)
+    end
+
+    def mkdir(path, parents = true)
+        return __dir_mkdir(path, parents)
+    end
+
+    def rmdir(path)
+        return __dir_rmdir(path)
+    end
+
+    def empty(path)
+        return __dir_empty(path)
+    end
+
+    def copy(source, destination)
+        return __dir_copy(source, destination)
+    end
+
+    def file_count(path)
+        return self.files(path).length()
+    end
+
+    def dir_count(path)
+        return self.dirs(path).length()
+    end
+
+    def has(path, name)
+        return self.entries(path).contains(name)
+    end
+end
+
+dir = Dir.new()

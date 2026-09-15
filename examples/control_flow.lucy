@@ -1,0 +1,9 @@
+for i in 1..5
+    if i % 2 == 0
+        print "even: $i"
+    else if i == 3
+        print "middle: $i"
+    else
+        print "odd: $i"
+    end
+end

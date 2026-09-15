@@ -1,0 +1,8 @@
+/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/CMakeFiles/lucy.dir
+/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/CMakeFiles/test.dir
+/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/CMakeFiles/edit_cache.dir
+/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/CMakeFiles/list_install_components.dir
+/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/CMakeFiles/install.dir
+/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/CMakeFiles/install/local.dir
+/mnt/c/Users/jinx/Downloads/lucy-1.0.0-release/build-install/CMakeFiles/install/strip.dir

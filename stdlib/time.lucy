@@ -1,0 +1,12 @@
+# Monotonic process clock helpers.
+class Clock
+    def milliseconds()
+        return millis()
+    end
+
+    def elapsed(start)
+        return self.milliseconds() - start
+    end
+end
+
+time = Clock.new()

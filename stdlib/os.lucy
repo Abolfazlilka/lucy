@@ -1,0 +1,56 @@
+# Operating-system helpers.
+class OS
+    def cwd()
+        return __dir_pwd()
+    end
+
+    def env(name)
+        return __os_env(name)
+    end
+
+    def setenv(name, value)
+        return __os_setenv(name, value)
+    end
+
+    def unsetenv(name)
+        return __os_unsetenv(name)
+    end
+
+    def system(command)
+        return __os_system(command)
+    end
+
+    def pid()
+        return __os_pid()
+    end
+
+    def cpu_count()
+        return __os_cpu_count()
+    end
+
+    def platform()
+        return PLATFORM
+    end
+
+    def version()
+        return VERSION
+    end
+
+    def home()
+        return __os_home()
+    end
+
+    def temp_dir()
+        return __os_temp_dir()
+    end
+
+    def command_exists(command)
+        return __os_command_exists(command)
+    end
+
+    def which(command)
+        return self.command_exists(command)
+    end
+end
+
+os = OS.new()

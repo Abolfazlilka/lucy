@@ -1,0 +1,34 @@
+# Lightweight SQLite database API.
+class Database
+    def initialize(path)
+        self.path = path
+    end
+
+    def execute(sql)
+        return __sqlite_execute(self.path, sql)
+    end
+
+    def query(sql)
+        return __sqlite_query(self.path, sql)
+    end
+
+    def create_table(name, columns)
+        return self.execute("CREATE TABLE " + name + " (" + columns + ")")
+    end
+
+    def insert(table, columns, values)
+        return self.execute("INSERT INTO " + table + " (" + columns + ") VALUES (" + values + ")")
+    end
+
+    def rows(sql)
+        return self.query(sql)
+    end
+end
+
+class SQLite
+    def open(path)
+        return Database.new(path)
+    end
+end
+
+sqlite = SQLite.new()

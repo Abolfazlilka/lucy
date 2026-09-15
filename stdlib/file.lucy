@@ -1,0 +1,62 @@
+# High-level file operations.
+class File
+    def read(path)
+        return __file_read(path)
+    end
+
+    def write(path, content)
+        return __file_write(path, content)
+    end
+
+    def append(path, content)
+        return __file_append(path, content)
+    end
+
+    def read_lines(path)
+        return __file_lines(path)
+    end
+
+    def write_lines(path, lines)
+        return __file_write_lines(path, lines)
+    end
+
+    def exists(path)
+        return __file_exists(path)
+    end
+
+    def size(path)
+        return __file_size(path)
+    end
+
+    def delete(path)
+        return __file_delete(path)
+    end
+
+    def copy(source, destination)
+        return __file_copy(source, destination)
+    end
+
+    def move(source, destination)
+        return __file_move(source, destination)
+    end
+
+    def touch(path)
+        return __file_touch(path)
+    end
+
+    def read_json(path)
+        import json
+        return json.parse(self.read(path))
+    end
+
+    def write_json(path, value)
+        import json
+        return self.write(path, json.stringify(value))
+    end
+
+    def append_line(path, line)
+        return self.append(path, line + "\n")
+    end
+end
+
+file = File.new()

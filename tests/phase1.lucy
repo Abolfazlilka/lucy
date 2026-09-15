@@ -1,0 +1,47 @@
+# Phase 1 language-core regression tests
+
+def greet(name, greeting = "Hello")
+    return greeting + ", " + name
+end
+
+assert greet("Nima") == "Hello, Nima"
+assert greet("Nima", "Hi") == "Hi, Nima"
+assert greet(name: "Nima", greeting: "Hey") == "Hey, Nima"
+
+def total(*values)
+    return sum(values)
+end
+
+assert total(1, 2, 3, 4) == 10
+assert total() == 0
+
+outer = 10
+if true
+    outer = 20
+    inner = 5
+end
+assert outer == 20
+
+def make_counter()
+    value = 0
+    def increment()
+        value += 1
+        return value
+    end
+    return increment
+end
+
+counter = make_counter()
+assert counter() == 1
+assert counter() == 2
+
+print "phase1 ok"
+
+assert type(ARGV) == "array"
+assert type(argv) == "array"
+assert ARGV.length() == argv.length()
+
+
+# Selective imports expose only the requested names.
+from math import Math
+assert type(Math) == "class"

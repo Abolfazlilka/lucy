@@ -1,0 +1,50 @@
+import file
+import dir
+import path
+import os
+
+assert 'hello' == "hello"
+assert 'it\'s Lucy' == "it's Lucy"
+name = 'Nima'
+assert 'Hello $name' == 'Hello Nima'
+
+class User
+    def initialize(name, age)
+        self.name = name
+        self.age = age
+    end
+    def label()
+        return self.name + ":" + str(self.age)
+    end
+end
+
+u = User.new('Nima', 21)
+assert u.name == 'Nima'
+assert u.age == 21
+assert u.label() == 'Nima:21'
+
+file.write('fs-test.txt', 'one\ntwo')
+assert file.exists('fs-test.txt')
+assert file.size('fs-test.txt') == 7
+assert file.read('fs-test.txt') == 'one\ntwo'
+assert len(file.read_lines('fs-test.txt')) == 2
+file.append('fs-test.txt', '\nthree')
+assert file.read_lines('fs-test.txt').last() == 'three'
+file.copy('fs-test.txt', 'fs-test-copy.txt')
+assert file.exists('fs-test-copy.txt')
+file.move('fs-test-copy.txt', 'fs-test-moved.txt')
+assert file.exists('fs-test-moved.txt')
+file.delete('fs-test.txt')
+file.delete('fs-test-moved.txt')
+
+dir.mkdir('fs-test-dir', true)
+assert dir.exists('fs-test-dir')
+file.touch(path.join(['fs-test-dir', 'a.txt']))
+assert dir.files('fs-test-dir').contains('a.txt')
+dir.rmdir('fs-test-dir')
+
+assert path.basename('/tmp/a.txt') == 'a.txt'
+assert path.extname('/tmp/a.txt') == '.txt'
+assert os.platform() != nil
+
+print 'filesystem ok'

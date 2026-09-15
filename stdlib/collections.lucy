@@ -1,0 +1,99 @@
+# Collection helpers built from Lucy's array and map primitives.
+class Collections
+    def first(items)
+        return items.first()
+    end
+
+    def last(items)
+        return items.last()
+    end
+
+    def reverse(items)
+        result = []
+        i = items.length() - 1
+        while i >= 0
+            result.push(items[i])
+            i -= 1
+        end
+        return result
+    end
+
+    def contains(items, value)
+        return items.contains(value)
+    end
+
+    def count(items, value)
+        return items.count(value)
+    end
+
+    def index(items, value)
+        return items.index(value)
+    end
+
+    def compact(items)
+        result = []
+        for item in items
+            if item
+                result.push(item)
+            end
+        end
+        return result
+    end
+
+    def unique(items)
+        result = []
+        for item in items
+            if !result.contains(item)
+                result.push(item)
+            end
+        end
+        return result
+    end
+
+    def flatten(items)
+        result = []
+        for item in items
+            if type(item) == "array"
+                nested = self.flatten(item)
+                for value in nested
+                    result.push(value)
+                end
+            else
+                result.push(item)
+            end
+        end
+        return result
+    end
+
+    def sum(items)
+        return sum(items)
+    end
+
+    def min(items)
+        if items.length() == 0
+            return nil
+        end
+        result = items[0]
+        for item in items
+            if item < result
+                result = item
+            end
+        end
+        return result
+    end
+
+    def max(items)
+        if items.length() == 0
+            return nil
+        end
+        result = items[0]
+        for item in items
+            if item > result
+                result = item
+            end
+        end
+        return result
+    end
+end
+
+collections = Collections.new()

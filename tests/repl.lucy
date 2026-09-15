@@ -1,0 +1,27 @@
+# Release regression coverage for REPL-facing runtime names and expanded libraries.
+assert VERSION == "1.0.0"
+assert type(ARGV) == "array"
+
+import math
+assert math.factorial(5) == 120
+assert math.gcd(84, 30) == 6
+assert math.lcm(6, 8) == 24
+assert math.average([2, 4, 6]) == 4
+
+import string
+assert string.capitalize("lucy") == "Lucy"
+assert string.split("a,b,c", ",").length() == 3
+assert "hello".slice(1, 4) == "ell"
+assert "hello".char_at(1) == "e"
+
+import collections
+assert collections.min([9, 2, 7]) == 2
+assert collections.max([9, 2, 7]) == 9
+assert collections.unique([1, 1, 2, 2]).length() == 2
+
+items = [1, 2]
+items.insert(1, 9)
+assert items.length() == 3
+assert items.remove_at(1) == 9
+
+print "release support ok"

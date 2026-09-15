@@ -1,0 +1,29 @@
+=begin
+Advanced feature test
+=end
+
+def twice(x)
+    return x * 2
+end
+
+assert (twice 4) == 8
+# Use explicit parentheses for comparison precedence.
+assert (twice 5) == 10
+
+class Sensor
+    def initialize(value)
+        self.value = value
+    end
+    def read()
+        return self.value
+    end
+end
+
+s = Sensor.new(25)
+assert s.read() == 25
+
+import math
+assert math.square(3) == 9
+
+
+print "advanced ok"
