@@ -1,7 +1,7 @@
 
 <div align="center">
 
-<img src="assets/logo.png" width="180" alt="Lucy">
+<img src="assets/lucy-logo.png" width="180" alt="Lucy">
 
 # Lucy
 
