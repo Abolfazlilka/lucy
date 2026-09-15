@@ -1,9 +1,19 @@
+
+<div align="center">
+
+<img src="assets/logo.png" width="180" alt="Lucy">
+
 # Lucy
 
-**Current release:** 1.0.0  
-**License:** GNU GPL v3  
-**Creator:** Nima (`nimacpp` / `nimacxx`)
+### A lightweight, dynamic programming language built with C++17.
 
+[![Version](https://img.shields.io/badge/version-1.0.0-8b5cf6?style=flat-square)](...)
+[![License](https://img.shields.io/badge/nimacpp?style=flat-square)](...)
+[![Language](https://img.shields.io/badge/runtime-C%2B%2B17-orange?style=flat-square)](...)
+
+**Simple syntax. Dynamic values. Classes. Modules. A small runtime.**
+
+</div>
 Lucy is a general-purpose, dynamically typed programming language implemented in C++17. It combines a small readable syntax, Ruby-like method calls, a Python-style REPL, and a standard library whose high-level API is written in Lucy itself.
 
 ## What Lucy provides
