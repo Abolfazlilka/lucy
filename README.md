@@ -8,7 +8,6 @@
 ### A lightweight, dynamic programming language built with C++17.
 
 [![Version](https://img.shields.io/badge/version-1.0.0-8b5cf6?style=flat-square)](...)
-[![License](https://img.shields.io/badge/nimacpp?style=flat-square)](...)
 [![Language](https://img.shields.io/badge/runtime-C%2B%2B17-orange?style=flat-square)](...)
 
 **Simple syntax. Dynamic values. Classes. Modules. A small runtime.**
