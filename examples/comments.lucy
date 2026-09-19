@@ -1,5 +1,0 @@
-=begin
-This is a multiline comment.
-It can span many lines.
-=end
-print "Comments work"

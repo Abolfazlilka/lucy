@@ -1,0 +1,5 @@
+import runtime
+
+values = [5, 2, 9, 2]
+print data.unique values
+print runtime.inspect values

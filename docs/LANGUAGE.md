@@ -10,7 +10,7 @@ name = "Lucy"
 count = 3
 
 # Constants
-const VERSION_NAME = "1.0.0"
+const VERSION_NAME = "1.0.1"
 
 # Conditions
 if count > 0
@@ -56,8 +56,9 @@ finally
 end
 
 # Modules
-import json
-data = json.parse("{\"name\":\"Lucy\"}")
+import data
+import data
+data = data.parse("{\"name\":\"Lucy\"}")
 ```
 
 ## Core types
@@ -146,3 +147,87 @@ The source filename is not included in the array.
 - [`REFERENCE.md`](REFERENCE.md) — exact language semantics and every built-in.
 - [`STDLIB.md`](STDLIB.md) — every standard-library module and public API.
 - [`CLI.md`](CLI.md) — command-line and REPL behavior.
+
+## 1.0.1 language additions
+
+### Semicolon statement separators
+
+A semicolon separates statements on the same physical line. Newlines remain valid separators.
+
+```lucy
+x = 1; y = 2; print x + y
+```
+
+Semicolons are separators, not expression operators. They are also accepted between statements inside blocks.
+
+### Lambda expressions
+
+Lucy supports closure-capturing expression lambdas:
+
+```lucy
+add = lambda(x, y) => x + y
+print add(2, 3)
+```
+
+A single parameter may omit parentheses:
+
+```lucy
+square = lambda x => x * x
+```
+
+Default parameters are allowed:
+
+```lucy
+increment = lambda(x, amount = 1) => x + amount
+```
+
+The lambda captures the lexical environment in which it is created and is callable like a normal Lucy function.
+
+### switch / case / default
+
+`switch` compares its value against each `case`. The first matching case executes. `default` executes when no case matches.
+
+```lucy
+switch status
+case 200
+    print "ok"
+case 404
+    print "not found"
+default
+    print "other"
+end
+```
+
+`break` exits the switch. Without `break`, Lucy still executes only the selected case; it does not perform implicit fall-through.
+
+### do ... while
+
+`do` executes its body before checking the condition, so the body runs at least once.
+
+```lucy
+i = 0
+do
+    i += 1
+while i < 3
+```
+
+### Time and Date operators
+
+`Time` supports `+`, `-`, and `<=>` with millisecond offsets or another `Time`. `Date` uses day offsets for `+` and `-`, and `<=>` compares timestamps.
+
+```lucy
+tomorrow = time.now() + 86400000
+difference = tomorrow - time.now()
+comparison = time.now() <=> tomorrow
+```
+
+### Set operators
+
+`Set` supports:
+
+- `a | b` — union
+- `a & b` — intersection
+- `a ^ b` — symmetric difference
+- `a - b` — difference
+
+The predicate methods `subset?`, `superset?`, and `intersect?` are also available.

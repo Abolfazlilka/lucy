@@ -1,0 +1,9 @@
+import sqlite
+import fs
+
+db = sqlite.open "lucy-example.sqlite"
+db.execute "drop table if exists users"
+db.execute "create table users (name text)"
+db.execute "insert into users values ('Lucy')"
+print db.query "select * from users"
+fs.remove "lucy-example.sqlite"

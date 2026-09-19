@@ -173,7 +173,7 @@ ARGV
 argv
 ```
 
-The `sys` module returns the same array through `sys.argv()`.
+The `system` module returns the same array through `sys.argv()`.
 
 ## 13. Module resolution
 

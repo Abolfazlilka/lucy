@@ -1,135 +1,69 @@
 # Lucy REPL
 
-The Lucy REPL is the interactive environment that starts when `lucy` is run without a source file or with `lucy -i`.
+## Overview
 
-## Starting the REPL
+Lucy 1.0.1 uses a native cross-platform line editor, while the user-facing REPL description layer is implemented in `stdlib/repl.lucy`. This split keeps terminal mechanics reliable while making the REPL's visible identity editable with Lucy itself.
 
-```text
-lucy
+## Editable REPL library
+
+The file `stdlib/repl.lucy` defines:
+
+| Function | Purpose |
+|---|---|
+| `banner()` | Startup banner text |
+| `version()` | Version shown by `:version` |
+| `prompt(depth)` | Primary/continuation prompt |
+| `commands()` | Command metadata |
+| `topics()` | Help topic list |
+| `help(topic)` | Help renderer |
+
+Changing these functions changes the corresponding REPL presentation without rebuilding the C++ interpreter.
+
+### Example customization
+
+```lucy
+def prompt(depth = 0)
+    if depth == 0
+        return "lucy> "
+    end
+    return ".... "
+end
 ```
 
-or:
+The native editor still owns cursor movement, history, completion, and terminal input. The Lucy layer owns the presentation and help content.
 
-```text
-lucy -i
-```
+## Starting
 
-Lucy 1.0.0 provides a native line editor on Windows, Linux, and macOS. It does not require Python, GNU Readline, or an external runtime dependency.
+Run `lucy` without a source file.
 
 ## Editing
 
-| Key | Action |
-|---|---|
-| Up | Previous history entry |
-| Down | Next history entry |
-| Left / Right | Move the cursor |
-| Home / End | Move to the beginning/end |
-| Backspace | Delete before the cursor |
-| Delete | Delete at the cursor |
-| Tab | Complete a name or member |
-| Ctrl-D | Exit when the input line is empty |
-
-The editor supports editing in the middle of a line, not only at the end.
+- Up/Down: history
+- Left/Right: cursor movement
+- Home/End: line boundaries
+- Tab: completion
+- Ctrl-D: exit
 
 ## History
 
-Lucy stores interactive commands persistently:
-
-- Linux/macOS: `~/.lucy_history`
-- Windows: `%USERPROFILE%\\.lucy_history`
-
-Up and Down can be used across REPL sessions. Lucy keeps the most recent 1000 entries and removes immediate/older duplicates when a command is entered again.
-
-Use:
-
-```text
-:history
-```
-
-to display stored entries from the current session.
+History is stored in `~/.lucy_history` on Unix-like systems and `%USERPROFILE%\.lucy_history` on Windows. Up to 1000 entries are retained.
 
 ## Completion
 
-Press Tab after a partial name. Completion covers:
-
-- language keywords
-- built-in functions
-- global constants and variables
-- standard-library modules
-- module members
-- methods of arrays
-- methods of strings
-- methods of maps
-- methods and fields of user objects
-- methods of user classes
-
-Examples:
-
-```text
->>> pri<Tab>
->>> print
-```
-
-```text
->>> import math
->>> math.sq<Tab>
->>> math.square
-```
-
-When several names share a prefix, the first Tab completes the common prefix. A following Tab displays the matching candidates.
+Completion covers language keywords, loaded names, built-ins, module names, module members, class members, object fields, and built-in Array/String/Map methods.
 
 ## Multiline input
 
-Block constructs use the continuation prompt:
+Blocks use `end`. `do ... while` and `switch ... case ... default ... end` are also recognized by the REPL's block-depth tracker.
 
-```text
->>> def greet(name)
-... print "Hello " + name
-... end
-```
+## Commands
 
-The REPL keeps collecting lines until the block is closed with `end`.
+- `:help` — rendered by `stdlib/repl.lucy`
+- `:clear` — clears the terminal and current input buffer
+- `:history` — shows recent history
+- `:version` — rendered by `stdlib/repl.lucy`
+- `:quit` / `:exit` — exits
 
-Supported block starters include `if`, `while`, `for`, `foreach`, `loop`, `function`, `def`, `class`, and `try`.
+## Language help
 
-## REPL commands
-
-| Command | Purpose |
-|---|---|
-| `:help` | Show REPL help |
-| `:history` | Show history entries |
-| `:clear` | Clear the terminal and current REPL state |
-| `:version` | Show the Lucy version |
-| `:quit` | Exit Lucy |
-| `:exit` | Exit Lucy |
-| `Ctrl-D` | Exit when the line is empty |
-
-## Interactive variables
-
-Values defined during the session remain available to later commands:
-
-```text
->>> name = "Lucy"
->>> version = VERSION
->>> print name + " " + version
-```
-
-Imported modules and functions also remain available throughout the session.
-
-## Script arguments
-
-When Lucy runs a file, command-line arguments are available through `ARGV` and `argv`:
-
-```text
-lucy app.lucy one two three
-```
-
-```lucy
-print ARGV
-```
-
-The source filename itself is not included in `ARGV`.
-
-## Terminal compatibility
-
-The line editor uses native console input on Windows and raw terminal input on Unix-like systems. When standard input is redirected rather than attached to a terminal, Lucy automatically falls back to normal line-based input so scripts and pipelines remain usable.
+Inside the REPL, `help print` and `help "lambda"` are Lucy syntax sugar for the Lucy-level `help` function supplied by `repl.lucy`. The documentation is not stored in the C++ runtime.

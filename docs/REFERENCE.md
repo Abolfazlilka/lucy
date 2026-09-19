@@ -1,10 +1,10 @@
 # Lucy Complete Reference
 
-**Language version:** 1.0.0  
+**Language version:** 1.0.1  
 **License:** GNU GPL v3  
 **Author:** Nima (`nimacpp` / `nimacxx`)
 
-This is the complete reference for the Lucy language as implemented by the 1.0.0 interpreter. It is written to be useful to a first-time programmer without hiding details from experienced developers.
+This is the complete reference for the Lucy language as implemented by the 1.0.1 interpreter. It is written to be useful to a first-time programmer without hiding details from experienced developers.
 
 > **Important:** This document describes the language that exists in the current interpreter. It does not describe planned features as if they already existed.
 
@@ -93,18 +93,18 @@ Lucy is dynamically typed. A variable does not have a permanently declared type.
 
 The runtime currently supports these value types:
 
-| Type       | Example          | Description                     |
-| ---------- | ---------------- | ------------------------------- |
-| `nil`      | `nil`            | Absence of a value              |
-| `bool`     | `true`           | Boolean value                   |
-| `int`      | `42`             | Signed integer                  |
-| `double`   | `3.14`           | Floating-point number           |
-| `string`   | `"Lucy"`         | Text                            |
-| `array`    | `[1, 2, 3]`      | Ordered mutable collection      |
-| `map`      | `{name: "Lucy"}` | String-keyed mutable collection |
-| `function` | `def add...`     | Callable function               |
-| `class`    | `class User...`  | Class object                    |
-| `instance` | `User.new()`     | Object created from a class     |
+| Type | Example | Description |
+|---|---|---|
+| `nil` | `nil` | Absence of a value |
+| `bool` | `true` | Boolean value |
+| `int` | `42` | Signed integer |
+| `double` | `3.14` | Floating-point number |
+| `text` | `"Lucy"` | Text |
+| `array` | `[1, 2, 3]` | Ordered mutable collection |
+| `map` | `{name: "Lucy"}` | String-keyed mutable collection |
+| `function` | `def add...` | Callable function |
+| `class` | `class User...` | Class object |
+| `instance` | `User.new()` | Object created from a class |
 
 Check a value's runtime type with `type()` or `typeof()`:
 
@@ -212,14 +212,14 @@ message = 'Hello'
 
 Supported escapes include:
 
-| Escape | Result          |
-| ------ | --------------- |
-| `\\n`  | newline         |
-| `\\t`  | tab             |
-| `\\r`  | carriage return |
-| `\\"`  | double quote    |
-| `\\'`  | single quote    |
-| `\\\\` | backslash       |
+| Escape | Result |
+|---|---|
+| `\\n` | newline |
+| `\\t` | tab |
+| `\\r` | carriage return |
+| `\\"` | double quote |
+| `\\'` | single quote |
+| `\\\\` | backslash |
 
 Unknown escapes are preserved as a backslash followed by the character.
 
@@ -274,7 +274,7 @@ If assignment targets an existing variable in an enclosing scope, Lucy updates t
 Use `const` for a binding that cannot be reassigned:
 
 ```lucy
-const VERSION = "1.0.0"
+const VERSION = "1.0.1"
 ```
 
 Reassigning a constant raises `NameError`.
@@ -897,29 +897,29 @@ Assignment requires an existing index; Lucy does not automatically grow an array
 
 Every array supports these methods:
 
-| Method      | Signature              | Return                       |
-| ----------- | ---------------------- | ---------------------------- |
-| `push`      | `push(value, ...)`     | new length                   |
-| `pop`       | `pop()`                | removed last value or `nil`  |
-| `shift`     | `shift()`              | removed first value or `nil` |
-| `unshift`   | `unshift(value, ...)`  | new length                   |
-| `insert`    | `insert(index, value)` | same array                   |
-| `remove_at` | `remove_at(index)`     | removed value or `nil`       |
-| `clear`     | `clear()`              | `nil`                        |
-| `first`     | `first()`              | first value or `nil`         |
-| `last`      | `last()`               | last value or `nil`          |
-| `contains`  | `contains(value)`      | `bool`                       |
-| `count`     | `count(value)`         | `int`                        |
-| `index`     | `index(value)`         | index or `nil`               |
-| `join`      | `join(separator)`      | `string`                     |
-| `reverse`   | `reverse()`            | same array                   |
-| `length`    | `length()`             | `int`                        |
-| `size`      | `size()`               | `int`                        |
-| `each`      | `each(function)`       | same array                   |
-| `map`       | `map(function)`        | new array                    |
-| `filter`    | `filter(function)`     | new array                    |
-| `any`       | `any(function)`        | `bool`                       |
-| `all`       | `all(function)`        | `bool`                       |
+| Method | Signature | Return |
+|---|---|---|
+| `push` | `push(value, ...)` | new length |
+| `pop` | `pop()` | removed last value or `nil` |
+| `shift` | `shift()` | removed first value or `nil` |
+| `unshift` | `unshift(value, ...)` | new length |
+| `insert` | `insert(index, value)` | same array |
+| `remove_at` | `remove_at(index)` | removed value or `nil` |
+| `clear` | `clear()` | `nil` |
+| `first` | `first()` | first value or `nil` |
+| `last` | `last()` | last value or `nil` |
+| `contains` | `contains(value)` | `bool` |
+| `count` | `count(value)` | `int` |
+| `index` | `index(value)` | index or `nil` |
+| `join` | `join(separator)` | `text` |
+| `reverse` | `reverse()` | same array |
+| `length` | `length()` | `int` |
+| `size` | `size()` | `int` |
+| `each` | `each(function)` | same array |
+| `map` | `map(function)` | new array |
+| `filter` | `filter(function)` | new array |
+| `any` | `any(function)` | `bool` |
+| `all` | `all(function)` | `bool` |
 
 ### `push`
 
@@ -1072,15 +1072,15 @@ This is map key access, not a class method.
 
 ## 44. Map methods
 
-| Method   | Signature         | Return          |
-| -------- | ----------------- | --------------- |
-| `get`    | `get(key)`        | value or `nil`  |
-| `set`    | `set(key, value)` | stored value    |
-| `has`    | `has(key)`        | `bool`          |
-| `delete` | `delete(key)`     | `bool`          |
-| `keys`   | `keys()`          | array of keys   |
-| `values` | `values()`        | array of values |
-| `clear`  | `clear()`         | `nil`           |
+| Method | Signature | Return |
+|---|---|---|
+| `get` | `get(key)` | value or `nil` |
+| `set` | `set(key, value)` | stored value |
+| `has` | `has(key)` | `bool` |
+| `delete` | `delete(key)` | `bool` |
+| `keys` | `keys()` | array of keys |
+| `values` | `values()` | array of values |
+| `clear` | `clear()` | `nil` |
 
 Map keys supplied to these methods must be strings.
 
@@ -1106,27 +1106,27 @@ The current implementation indexes bytes rather than Unicode code points. `lengt
 
 ## 46. String methods
 
-| Method        | Signature           | Return                        |
-| ------------- | ------------------- | ----------------------------- |
-| `upper`       | `upper()`           | uppercase copy                |
-| `upcase`      | `upcase()`          | alias of `upper`              |
-| `lower`       | `lower()`           | lowercase copy                |
-| `downcase`    | `downcase()`        | alias of `lower`              |
-| `strip`       | `strip()`           | trimmed copy                  |
-| `trim`        | `trim()`            | alias of `strip`              |
-| `contains`    | `contains(text)`    | `bool`                        |
-| `starts_with` | `starts_with(text)` | `bool`                        |
-| `ends_with`   | `ends_with(text)`   | `bool`                        |
-| `length`      | `length()`          | byte length                   |
-| `size`        | `size()`            | byte length                   |
-| `reverse`     | `reverse()`         | reversed copy                 |
-| `repeat`      | `repeat(count)`     | repeated string               |
-| `to_int`      | `to_int()`          | `int`                         |
-| `to_float`    | `to_float()`        | `double`                      |
-| `slice`       | `slice(start, end)` | substring                     |
-| `char_at`     | `char_at(index)`    | one-character string or `nil` |
-| `split`       | `split(separator)`  | array                         |
-| `replace`     | `replace(from, to)` | replaced copy                 |
+| Method | Signature | Return |
+|---|---|---|
+| `upper` | `upper()` | uppercase copy |
+| `upcase` | `upcase()` | alias of `upper` |
+| `lower` | `lower()` | lowercase copy |
+| `downcase` | `downcase()` | alias of `lower` |
+| `strip` | `strip()` | trimmed copy |
+| `trim` | `trim()` | alias of `strip` |
+| `contains` | `contains(text)` | `bool` |
+| `starts_with` | `starts_with(text)` | `bool` |
+| `ends_with` | `ends_with(text)` | `bool` |
+| `length` | `length()` | byte length |
+| `size` | `size()` | byte length |
+| `reverse` | `reverse()` | reversed copy |
+| `repeat` | `repeat(count)` | repeated string |
+| `to_int` | `to_int()` | `int` |
+| `to_float` | `to_float()` | `double` |
+| `slice` | `slice(start, end)` | substring |
+| `char_at` | `char_at(index)` | one-character string or `nil` |
+| `split` | `split(separator)` | array |
+| `replace` | `replace(from, to)` | replaced copy |
 
 `reverse`, `upper`, `lower`, and related operations return new strings; they do not mutate the original string.
 
@@ -1157,20 +1157,20 @@ Returns a one-character string at an index, or `nil` when the index is invalid.
 
 Both `int` and `double` values support these methods:
 
-| Method      | Signature       | Return                 |
-| ----------- | --------------- | ---------------------- |
-| `abs`       | `abs()`         | numeric absolute value |
-| `floor`     | `floor()`       | `double`               |
-| `ceil`      | `ceil()`        | `double`               |
-| `round`     | `round()`       | `double`               |
-| `sqrt`      | `sqrt()`        | `double`               |
-| `sin`       | `sin()`         | `double`               |
-| `cos`       | `cos()`         | `double`               |
-| `tan`       | `tan()`         | `double`               |
-| `log`       | `log()`         | `double`               |
-| `to_int`    | `to_int()`      | `int`                  |
-| `to_string` | `to_string()`   | `string`               |
-| `pow`       | `pow(exponent)` | `double`               |
+| Method | Signature | Return |
+|---|---|---|
+| `abs` | `abs()` | numeric absolute value |
+| `floor` | `floor()` | `double` |
+| `ceil` | `ceil()` | `double` |
+| `round` | `round()` | `double` |
+| `sqrt` | `sqrt()` | `double` |
+| `sin` | `sin()` | `double` |
+| `cos` | `cos()` | `double` |
+| `tan` | `tan()` | `double` |
+| `log` | `log()` | `double` |
+| `to_int` | `to_int()` | `int` |
+| `to_string` | `to_string()` | `text` |
+| `pow` | `pow(exponent)` | `double` |
 
 `sqrt()` rejects negative values.
 
@@ -1364,28 +1364,28 @@ If an exception is not caught, `finally` still runs before the exception continu
 
 The interpreter and standard library use error names such as:
 
-| Error               | Typical cause                                 |
-| ------------------- | --------------------------------------------- |
-| `NameError`         | unknown variable or constant assignment error |
-| `TypeError`         | incompatible value type                       |
-| `ValueError`        | invalid value or conversion                   |
-| `ArgumentError`     | wrong function argument usage                 |
-| `IndexError`        | invalid array/string index                    |
-| `ZeroDivisionError` | division or modulo by zero                    |
-| `AssertionError`    | failed `assert`                               |
-| `ImportError`       | module cannot be loaded                       |
-| `IOError`           | filesystem or input/output failure            |
-| `ProcessError`      | process execution failure                     |
-| `RegexError`        | invalid regular expression                    |
-| `JSONDecodeError`   | invalid JSON                                  |
-| `CSVError`          | invalid CSV                                   |
-| `HTTPError`         | HTTP client/curl failure                      |
-| `SQLiteError`       | SQLite failure                                |
-| `LoopError`         | loop safety limit exceeded                    |
-| `ShellError`        | backtick shell command failure                |
-| `OperatorError`     | unsupported operation                         |
-| `RuntimeError`      | generic runtime failure                       |
-| `Exception`         | explicit `throw` or generic caught exception  |
+| Error | Typical cause |
+|---|---|
+| `NameError` | unknown variable or constant assignment error |
+| `TypeError` | incompatible value type |
+| `ValueError` | invalid value or conversion |
+| `ArgumentError` | wrong function argument usage |
+| `IndexError` | invalid array/string index |
+| `ZeroDivisionError` | division or modulo by zero |
+| `AssertionError` | failed `assert` |
+| `ImportError` | module cannot be loaded |
+| `IOError` | filesystem or input/output failure |
+| `ProcessError` | process execution failure |
+| `RegexError` | invalid regular expression |
+| `JSONDecodeError` | invalid JSON |
+| `CSVError` | invalid CSV |
+| `HTTPError` | HTTP client/curl failure |
+| `SQLiteError` | SQLite failure |
+| `LoopError` | loop safety limit exceeded |
+| `ShellError` | backtick shell command failure |
+| `OperatorError` | unsupported operation |
+| `RuntimeError` | generic runtime failure |
+| `Exception` | explicit `throw` or generic caught exception |
 
 ---
 
@@ -1460,7 +1460,7 @@ math.square(4)
 
 works naturally.
 
-Functions and classes exported from modules remain available through the module object and are re-homed to the global closure environment so they can continue resolving shared global helpers.
+Ordinary imports expose only public top-level functions through the module object. Classes and implementation objects stay private unless explicitly requested with `from module import Class`. Public calls are intentionally one level deep, such as `fs.read(path)` and `http.get(url)`.
 
 Circular imports are rejected with `ImportError`.
 
@@ -1699,7 +1699,7 @@ cwd()
 getenv(name)
 ```
 
-The preferred public API is the `file`, `dir`, `path`, and `os` standard-library modules.
+The preferred public API is the `fs`, `fs`, `fs`, and `system` standard-library modules.
 
 ## 86. `sleep`
 
@@ -1732,12 +1732,16 @@ The preferred public API is `random.integer`.
 ## 89. `help`
 
 ```lucy
+from repl import help
 help
 help print
+help "lambda"
 help array.push
 ```
 
-The current runtime includes a small built-in help index. The full authoritative API is documented in `docs/REFERENCE.md` and `docs/STDLIB.md`.
+`help` is no longer a C++-owned documentation table. Its implementation lives in `stdlib/repl.lucy`, so the help text can be changed using Lucy. The parser only provides `help topic` syntax sugar; the documentation itself is not embedded in the interpreter.
+
+The exhaustive implementation inventory is in `docs/API.md`.
 
 ---
 
@@ -1761,7 +1765,7 @@ For this release:
 print VERSION
 ```
 
-prints `1.0.0`.
+prints `1.0.1`.
 
 ## 93. `PLATFORM`
 
@@ -1842,7 +1846,7 @@ or:
 lucy -i
 ```
 
-Lucy 1.0.0 provides a cross-platform interactive line editor on Windows, Linux, and macOS.
+Lucy 1.0.1 provides a cross-platform interactive line editor on Windows, Linux, and macOS.
 
 ### Editing
 
@@ -1983,7 +1987,7 @@ Member/index/call:
 
 ```lucy
 import math
-import file
+import fs
 
 name = "Lucy"
 numbers = [1, 2, 3, 4, 5]
@@ -2052,3 +2056,71 @@ A first-time programmer should learn Lucy in this order:
 13. command-line applications.
 
 A programmer coming from Python, Ruby, JavaScript, C++, or another language can usually skip the introductory examples and use the syntax tables and API sections directly.
+
+## 1.0.1 additions
+
+### Lambda expressions
+
+Syntax:
+
+```lucy
+lambda(parameters) => expression
+lambda parameter => expression
+```
+
+A lambda is a first-class callable value. It captures the current lexical environment and uses the same argument binding rules as named functions, including defaults.
+
+### `switch`
+
+Syntax:
+
+```lucy
+switch expression
+case expression
+    statements
+default
+    statements
+end
+```
+
+Cases are compared using Lucy equality. Only the first matching case executes. `break` may be used to leave the selected case immediately.
+
+### `do ... while`
+
+Syntax:
+
+```lucy
+do
+    statements
+while expression
+```
+
+The body executes before the condition is evaluated.
+
+### Semicolon separators
+
+Statements may be separated by `;` instead of a newline:
+
+```lucy
+x = 1; y = 2; print x + y
+```
+
+### Standard-library import policy
+
+Lucy does not use a language-level namespace feature. An ordinary `import module` creates a module object containing its public top-level functions. For example:
+
+```lucy
+import math
+math.square(5)
+```
+
+Use an explicit selective import when a free function should enter the current scope:
+
+```lucy
+from math import square
+square(5)
+```
+
+This prevents unrelated modules from overwriting names such as `get`, `post`, `cwd`, `parse`, and `run`.
+
+Public classes retain their Ruby-style convenience names after import, so APIs such as `Set.new`, `Logger.new`, and `ERB.new` remain compatible.

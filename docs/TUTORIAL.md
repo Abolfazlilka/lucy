@@ -327,17 +327,18 @@ print greet("Nima")
 # 14. Reading files
 
 ```lucy
-import file
+import fs
 
-file.write("notes.txt", "Hello from Lucy")
-text = file.read("notes.txt")
+import fs
+fs.write("notes.txt", "Hello from Lucy")
+text = fs.read("notes.txt")
 print text
 ```
 
 Read lines:
 
 ```lucy
-lines = file.read_lines("notes.txt")
+lines = fs.read_lines("notes.txt")
 ```
 
 ---
@@ -345,9 +346,10 @@ lines = file.read_lines("notes.txt")
 # 15. JSON
 
 ```lucy
-import json
+import data
 
-data = json.parse("{\"name\":\"Lucy\",\"version\":11}")
+import data
+value = data.parse("{\"name\":\"Lucy\",\"version\":11}")
 print data.name
 ```
 
@@ -359,7 +361,7 @@ payload = {
     version: 11
 }
 
-print json.stringify(payload)
+print data.stringify(payload)
 ```
 
 ---
@@ -367,7 +369,7 @@ print json.stringify(payload)
 # 16. Regular expressions
 
 ```lucy
-import regex
+import text
 
 if regex.match("^[a-z]+$", "lucy")
     print "valid"
@@ -428,27 +430,29 @@ name = ARGV[0]
 print "Hello $name"
 ```
 
-`ARGV` is an array of strings. `argv` is a lowercase alias, and `sys.argv()` provides a module-based accessor.
+`ARGV` is an array of strings. `system.argv()` provides the standard-library accessor.
 
 ---
 
 # 20. A small real application
 
 ```lucy
-import json
-import file
-import path
+import data
+import fs
+import fs
 
 config_path = "config.json"
 
-if !file.exists(config_path)
-    file.write(config_path, "{\"name\":\"Lucy\"}")
+import fs
+if !fs.exists(config_path)
+    fs.write(config_path, "{\"name\":\"Lucy\"}")
 end
 
-config = json.parse(file.read(config_path))
+import data
+config = data.parse(fs.read(config_path))
 
 print "Application: $config.name"
-print "Config: " + path.absolute(config_path)
+print "Config: " + fs.absolute(config_path)
 ```
 
 This is already the beginning of the kind of structure you can use for real command-line applications.

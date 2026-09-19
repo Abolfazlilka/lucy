@@ -1,7 +1,0 @@
-s = " hello Lucy "
-assert s.upper() == " HELLO LUCY "
-assert s.strip() == "hello Lucy"
-assert s.contains("Lucy")
-assert "Lucy" in s
-assert 5.sqrt() > 2
-print "strings ok"

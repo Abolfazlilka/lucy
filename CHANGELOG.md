@@ -1,6 +1,35 @@
 # Changelog
 
+## 1.0.1 
+### Native standard library consolidation
 
+- Consolidated overlapping standard-library modules into domain-oriented `app`, `crypto`, `data`, `fs`, `http`, `runtime`, `system`, `text`, and `time` modules.
+- Kept the existing operations while giving each domain one canonical home.
+- Expanded `examples/` to 24 multi-step examples covering every canonical native library.
+- 
+### REPL and library identity
+
+- Moved the editable REPL help/presentation layer into `stdlib/repl.lucy`.
+  
+- Added Lucy-native `flow`, `data`, and `result` modules.
+  
+- Added exhaustive `docs/API.md` documentation for core, native bridges, and stdlib declarations.
+  
+- Audited the expanded standard library and restored compatibility aliases for Set predicates.
+  
+- Added `Set.subset?`, `Set.superset?`, and boolean `Set.intersect?`.
+  
+- Added Set operators `|`, `&`, `^`, and `-`.
+  
+- Kept `File` and `FileUtils` APIs distinct while preserving both low-level and utility-level file operations.
+  
+- Reduced accidental global function collisions between imported modules; free functions remain namespaced unless explicitly imported with `from ... import ...`.
+  
+- Added `Time` and `Date` arithmetic with `+`, `-`, and `<=>`.
+  
+- Added `switch/case/default`, `do ... while`, expression lambdas, and semicolon statement separators.
+  
+- Updated language, reference, standard-library, and release documentation for 1.0.1.
 ## 1.0.0
 
 - Promoted Lucy to its first stable release.

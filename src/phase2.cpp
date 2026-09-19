@@ -438,6 +438,34 @@ std::string json_stringify(const Value& value) {
     throw std::runtime_error("TypeError: value is not JSON serializable");
 }
 
+std::string json_pretty(const Value& value, int depth = 0) {
+    const std::string indent(static_cast<std::size_t>(depth) * 2, ' ');
+    const std::string child_indent(static_cast<std::size_t>(depth + 1) * 2, ' ');
+    if (auto array = std::get_if<Value::ArrayPtr>(&value.data)) {
+        if ((*array)->empty()) return "[]";
+        std::string result = "[\n";
+        for (std::size_t i = 0; i < (*array)->size(); ++i) {
+            if (i) result += ",\n";
+            result += child_indent + json_pretty((*array)->at(i), depth + 1);
+        }
+        result += "\n" + indent + "]";
+        return result;
+    }
+    if (auto map = std::get_if<Value::MapPtr>(&value.data)) {
+        if ((*map)->empty()) return "{}";
+        std::string result = "{\n";
+        bool first = true;
+        for (const auto& [key, item] : **map) {
+            if (!first) result += ",\n";
+            first = false;
+            result += child_indent + "\"" + json_escape(key) + "\": " + json_pretty(item, depth + 1);
+        }
+        result += "\n" + indent + "}";
+        return result;
+    }
+    return json_stringify(value);
+}
+
 // ------------------------------ Encoding ------------------------------
 
 const char* base64_table =
@@ -947,6 +975,20 @@ void install_phase2_builtins(BuiltinMap& builtins) {
 
     builtins["__http_post"] = [](const std::vector<Value>& args) {
         return http_request(args, "POST");
+    };
+
+    builtins["__http_request"] = [](const std::vector<Value>& args) {
+        require_range(args, 2, 3, "http.request");
+        const std::string method = string_arg(args[0], "http.request");
+        std::vector<Value> request_args;
+        request_args.push_back(args[1]);
+        if (args.size() == 3) request_args.push_back(args[2]);
+        return http_request(request_args, method);
+    };
+
+    builtins["__json_pretty"] = [](const std::vector<Value>& args) {
+        require_count(args, 1, "json.pretty_generate");
+        return Value(json_pretty(args[0]));
     };
 
     // SQLite --------------------------------------------------------

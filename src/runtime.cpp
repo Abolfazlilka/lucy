@@ -2,6 +2,7 @@
 #include "lucy/lexer.hpp"
 #include "lucy/parser.hpp"
 #include "lucy/phase2.hpp"
+#include "lucy/stdlib_native.hpp"
 #include "lucy/repl.hpp"
 #include <algorithm>
 #include <chrono>
@@ -52,7 +53,7 @@ Interpreter::Interpreter(std::vector<std::string> argv)
 
     globals_->define("PI", 3.141592653589793, true);
     globals_->define("E", 2.718281828459045, true);
-    globals_->define("VERSION", "1.0.0", true);
+    globals_->define("VERSION", "1.0.1", true);
 
 #ifdef _WIN32
     globals_->define("PLATFORM", std::string("windows"), true);
@@ -75,7 +76,6 @@ Interpreter::Interpreter(std::vector<std::string> argv)
     globals_->define("argv", Value(arguments), true);
 }
 void Interpreter::install_builtins(){
- builtins_["puts"]=[&](const std::vector<Value>&a){for(size_t i=0;i<a.size();++i){if(i)std::cout<<' ';std::cout<<a[i].to_string();}return Value{};};
  builtins_["print"]=[&](const std::vector<Value>&a){for(size_t i=0;i<a.size();++i){if(i)std::cout<<' ';std::cout<<a[i].to_string();}std::cout<<'\n';return Value{};};builtins_["puts"]=builtins_["print"];
  builtins_["input"]=[](const std::vector<Value>&a){if(a.size()>1)throw std::runtime_error("ArgumentError: input expects 0 or 1 argument(s)");if(!a.empty())std::cout<<a[0].to_string();std::string s;std::getline(std::cin,s);return Value(s);};
  builtins_["len"]=[](const std::vector<Value>&a){need(a.size(),1,"len");if(auto p=std::get_if<std::string>(&a[0].data))return Value((long long)p->size());if(auto p=std::get_if<Value::ArrayPtr>(&a[0].data))return Value((long long)(*p)->size());if(auto p=std::get_if<Value::MapPtr>(&a[0].data))return Value((long long)(*p)->size());throw std::runtime_error("TypeError: len expects string, array, or map");};
@@ -89,7 +89,7 @@ void Interpreter::install_builtins(){
  builtins_["abs"]=[](const std::vector<Value>&a){need(a.size(),1,"abs");return Value(std::fabs(num(a[0],"abs")));};
  builtins_["sqrt"]=[](const std::vector<Value>&a){need(a.size(),1,"sqrt");double x=num(a[0],"sqrt");if(x<0)throw std::runtime_error("ValueError: sqrt domain error");return Value(std::sqrt(x));};
  for(auto [name,fn]:std::vector<std::pair<std::string,double(*)(double)>>{{"sin",std::sin},{"cos",std::cos},{"tan",std::tan},{"exp",std::exp},{"floor",std::floor},{"ceil",std::ceil}})builtins_[name]=[fn,name](const std::vector<Value>&a){need(a.size(),1,name);return Value(fn(num(a[0],name)));};
- builtins_["log"]=[](const std::vector<Value>&a){need(a.size(),1,"log");double x=num(a[0],"log");if(x<=0)throw std::runtime_error("ValueError: log domain error");return Value(std::log(x));};builtins_["pow"]=[](const std::vector<Value>&a){need(a.size(),2,"pow");return Value(std::pow(num(a[0],"pow"),num(a[1],"pow")));};
+ builtins_["log"]=[](const std::vector<Value>&a){need(a.size(),1,"log");double x=num(a[0],"log");if(x<=0)throw std::runtime_error("ValueError: log domain error");return Value(std::log(x));};builtins_["log10"]=[](const std::vector<Value>&a){need(a.size(),1,"log10");double x=num(a[0],"log10");if(x<=0)throw std::runtime_error("ValueError: log10 domain error");return Value(std::log10(x));};builtins_["exp"]=[](const std::vector<Value>&a){need(a.size(),1,"exp");return Value(std::exp(num(a[0],"exp")));};builtins_["pow"]=[](const std::vector<Value>&a){need(a.size(),2,"pow");return Value(std::pow(num(a[0],"pow"),num(a[1],"pow")));};
  builtins_["assert"]=[this](const std::vector<Value>&a){if(a.empty()||a.size()>2)throw std::runtime_error("ArgumentError: assert expects 1 or 2 arguments");if(!a[0].is_truthy())throw std::runtime_error("AssertionError: "+(a.size()==2?a[1].to_string():"assertion failed"));return Value{};};
  builtins_["read_file"]=[this](const std::vector<Value>&a){need(a.size(),1,"read_file");return Value(read_file(std::get<std::string>(a[0].data)));};builtins_["write_file"]=[this](const std::vector<Value>&a){need(a.size(),2,"write_file");std::ofstream f(std::get<std::string>(a[0].data));if(!f)throw std::runtime_error("IOError: cannot write file");f<<std::get<std::string>(a[1].data);return Value{};};
  builtins_["exists"]=[](const std::vector<Value>&a){need(a.size(),1,"exists");return Value(fs::exists(std::get<std::string>(a[0].data)));};builtins_["cwd"]=[](const std::vector<Value>&a){need(a.size(),0,"cwd");return Value(fs::current_path().string());};
@@ -196,15 +196,56 @@ void Interpreter::install_builtins(){
  };
  builtins_["__os_cpu_count"]=[](const std::vector<Value>&a){need(a.size(),0,"OS.cpu_count");auto n=std::thread::hardware_concurrency();return Value((long long)n);};
  builtins_["random_int"]=[](const std::vector<Value>&a){need(a.size(),2,"random_int");static std::mt19937_64 g(std::random_device{}());return Value((long long)std::uniform_int_distribution<long long>(integer(a[0],"random_int"),integer(a[1],"random_int"))(g));};
+ builtins_["__kernel_send"]=[this](const std::vector<Value>&a){if(a.size()<2||a.size()>3)throw std::runtime_error("ArgumentError: Kernel.send expects 2 or 3 arguments");std::string name=std::get<std::string>(a[1].data);Value member=member_get(a[0],name);std::vector<Value>args;if(a.size()==3&&std::holds_alternative<Value::ArrayPtr>(a[2].data)){args=*std::get<Value::ArrayPtr>(a[2].data);}else args=std::vector<Value>(a.begin()+2,a.end());return call(member,args);};
+ builtins_["__kernel_respond_to"]=[this](const std::vector<Value>&a){need(a.size(),2,"Kernel.respond_to");std::string name=std::get<std::string>(a[1].data);try{member_get(a[0],name);return Value(true);}catch(...){return Value(false);}};
+ builtins_["__kernel_methods"]=[this](const std::vector<Value>&a){need(a.size(),1,"Kernel.methods");Array result;if(auto i=std::get_if<Value::InstancePtr>(&a[0].data)){for(const auto&[name,value]:(*i)->fields)result.emplace_back(name);for(auto k=(*i)->klass;k;k=k->parent)for(const auto&[name,value]:k->methods)result.emplace_back(name);}else if(auto m=std::get_if<Value::MapPtr>(&a[0].data)){for(const auto&[name,value]:**m)result.emplace_back(name);}return Value(std::move(result));};
+ builtins_["__kernel_ancestors"]=[this](const std::vector<Value>&a){need(a.size(),1,"Kernel.ancestors");Array result;if(auto i=std::get_if<Value::InstancePtr>(&a[0].data)){for(auto k=(*i)->klass;k;k=k->parent)result.emplace_back(k->name);}else if(auto c=std::get_if<Value::ClassPtr>(&a[0].data)){for(auto k=*c;k;k=k->parent)result.emplace_back(k->name);}return Value(std::move(result));};
+ builtins_["__kernel_superclass"]=[this](const std::vector<Value>&a){need(a.size(),1,"Kernel.superclass");if(auto i=std::get_if<Value::InstancePtr>(&a[0].data)){auto p=(*i)->klass->parent;return p?Value(p->name):Value{};}if(auto c=std::get_if<Value::ClassPtr>(&a[0].data)){return (*c)->parent?Value((*c)->parent->name):Value{};}return Value{};};
+ builtins_["__kernel_global_variables"]=[this](const std::vector<Value>&){Array result;for(const auto&[name,entry]:globals_->values())result.emplace_back(name);return Value(std::move(result));};
+ builtins_["__kernel_local_variables"]=[this](const std::vector<Value>&){Array result;for(const auto&[name,entry]:env_->values())result.emplace_back(name);return Value(std::move(result));};
  install_phase2_builtins(builtins_);
- builtins_["help"]=[this](const std::vector<Value>&a){if(a.empty()){std::cout<<"Lucy help: print input len str int float type range assert file dir path os\n";return Value{};}std::string q=a[0].to_string();static const std::unordered_map<std::string,std::string> docs={{"print","print(value, ...) -> prints values separated by spaces"},{"input","input([prompt]) -> reads one line"},{"len","len(value) -> length of string, array, or map"},{"range","range(stop) or range(start, stop[, step]) -> integer array"},{"assert","assert(condition[, message]) -> raises AssertionError when false"},{"array.push","array.push(value, ...) -> appends values and returns new length"},{"array.pop","array.pop() -> removes and returns last value"},{"string.upper","string.upper() -> uppercase copy"},{"string.strip","string.strip() -> removes surrounding whitespace"},{"number.sqrt","number.sqrt() -> square root"},{"map.get","map.get(key) -> returns value or nil"},{"map.set","map.set(key, value) -> stores and returns value"}};auto it=docs.find(q);if(it==docs.end())std::cout<<"No documentation for '"<<q<<"'.\n";else std::cout<<it->second<<"\n";return Value{};};
+ install_extended_stdlib_builtins(builtins_);
 }
 bool Interpreter::equal(const Value&a,const Value&b)const{if(a.type_name()!=b.type_name()&&a.is_number()&&b.is_number())return num(a,"==")==num(b,"==");if(a.data.index()!=b.data.index())return false;if(std::holds_alternative<Nil>(a.data))return true;if(auto x=std::get_if<bool>(&a.data))return *x==std::get<bool>(b.data);if(auto x=std::get_if<long long>(&a.data))return *x==std::get<long long>(b.data);if(auto x=std::get_if<double>(&a.data))return *x==std::get<double>(b.data);if(auto x=std::get_if<std::string>(&a.data))return *x==std::get<std::string>(b.data);return a.to_string()==b.to_string();}
 Value Interpreter::compound(const Value&a,const Token&o,const Value&b){Token q=o;if(q.type==TokenType::PlusEqual)q.type=TokenType::Plus;if(q.type==TokenType::MinusEqual)q.type=TokenType::Minus;if(q.type==TokenType::StarEqual)q.type=TokenType::Star;if(q.type==TokenType::SlashEqual)q.type=TokenType::Slash;if(q.type==TokenType::PercentEqual)q.type=TokenType::Percent;if(q.type==TokenType::PowerEqual)q.type=TokenType::Power;if(q.type==TokenType::BitAndEqual)q.type=TokenType::BitAnd;if(q.type==TokenType::BitOrEqual)q.type=TokenType::BitOr;if(q.type==TokenType::BitXorEqual)q.type=TokenType::BitXor;if(q.type==TokenType::ShiftLeftEqual)q.type=TokenType::ShiftLeft;if(q.type==TokenType::ShiftRightEqual)q.type=TokenType::ShiftRight;return binary(a,q,b);}
-Value Interpreter::binary(const Value&a,const Token&o,const Value&b){if(o.type==TokenType::Plus){if(auto x=std::get_if<std::string>(&a.data))return Value(*x+b.to_string());if(auto x=std::get_if<Value::ArrayPtr>(&a.data)){auto r=**x;if(auto y=std::get_if<Value::ArrayPtr>(&b.data))r.insert(r.end(),(*y)->begin(),(*y)->end());else r.push_back(b);return Value(std::move(r));}if(a.is_number()&&b.is_number()){double r=num(a,"+")+num(b,"+");if(std::holds_alternative<long long>(a.data)&&std::holds_alternative<long long>(b.data))return Value((long long)r);return Value(r);}}
+Value Interpreter::binary(const Value&a,const Token&o,const Value&b){
+ if(auto ai=std::get_if<Value::InstancePtr>(&a.data)){
+   const std::string cls=(*ai)->klass?(*ai)->klass->name:"";
+   if(cls=="Time"||cls=="Date"){
+     auto ts=(*ai)->fields.find("timestamp");
+     if(ts!=(*ai)->fields.end()){
+       long long left=integer(ts->second,o.lexeme);
+       if(o.type==TokenType::Plus||o.type==TokenType::Minus){
+         if(b.is_number()){
+           long long delta=integer(b,o.lexeme)*(cls=="Date"?86400000LL:1LL);
+           return call(member_get(a,o.type==TokenType::Plus?"add":"subtract"),{Value(delta)});
+         }
+         if(o.type==TokenType::Minus){
+           if(auto bi=std::get_if<Value::InstancePtr>(&b.data)){
+             auto bt=(*bi)->fields.find("timestamp");
+             if(bt!=(*bi)->fields.end() && (*bi)->klass->name==cls) return Value(left-integer(bt->second,"-"));
+           }
+         }
+       }
+       if(o.type==TokenType::Spaceship){
+         if(auto bi=std::get_if<Value::InstancePtr>(&b.data)){
+           auto bt=(*bi)->fields.find("timestamp");
+           if(bt!=(*bi)->fields.end() && (*bi)->klass->name==cls){long long right=integer(bt->second,"<=>");return Value(left<right?-1:left>right?1:0);}
+         }
+       }
+     }
+   }
+   if(cls=="Set"){
+     if(o.type==TokenType::BitOr) return call(member_get(a,"union"),{b});
+     if(o.type==TokenType::BitAnd) return call(member_get(a,"intersection"),{b});
+     if(o.type==TokenType::BitXor) return call(member_get(a,"symmetric_difference"),{b});
+     if(o.type==TokenType::Minus) return call(member_get(a,"difference"),{b});
+   }
+ }
+ if(o.type==TokenType::Plus){if(auto x=std::get_if<std::string>(&a.data))return Value(*x+b.to_string());if(auto x=std::get_if<Value::ArrayPtr>(&a.data)){auto r=**x;if(auto y=std::get_if<Value::ArrayPtr>(&b.data))r.insert(r.end(),(*y)->begin(),(*y)->end());else r.push_back(b);return Value(std::move(r));}if(a.is_number()&&b.is_number()){double r=num(a,"+")+num(b,"+");if(std::holds_alternative<long long>(a.data)&&std::holds_alternative<long long>(b.data))return Value((long long)r);return Value(r);}}
  if(o.type==TokenType::Minus||o.type==TokenType::Star||o.type==TokenType::Slash||o.type==TokenType::Power){double x=num(a,o.lexeme),y=num(b,o.lexeme);if(o.type==TokenType::Slash&&y==0)throw std::runtime_error("ZeroDivisionError: division by zero");double r=o.type==TokenType::Minus?x-y:o.type==TokenType::Star?x*y:o.type==TokenType::Slash?x/y:std::pow(x,y);if(std::holds_alternative<long long>(a.data)&&std::holds_alternative<long long>(b.data)&&o.type!=TokenType::Slash&&o.type!=TokenType::Power)return Value((long long)r);return Value(r);}
  if(o.type==TokenType::Percent){long long y=integer(b,"%");if(y==0)throw std::runtime_error("ZeroDivisionError: modulo by zero");return Value(integer(a,"%")%y);}if(o.type==TokenType::EqualEqual)return Value(equal(a,b));if(o.type==TokenType::BangEqual)return Value(!equal(a,b));if(o.type==TokenType::StrictEqual)return Value(a.type_name()==b.type_name()&&equal(a,b));if(o.type==TokenType::StrictNotEqual)return Value(!(a.type_name()==b.type_name()&&equal(a,b)));
- if(o.type==TokenType::Greater||o.type==TokenType::GreaterEqual||o.type==TokenType::Less||o.type==TokenType::LessEqual){if(auto x=std::get_if<std::string>(&a.data)){auto y=std::get_if<std::string>(&b.data);if(!y)throw std::runtime_error("TypeError: incompatible comparison types");if(o.type==TokenType::Greater)return Value(*x>*y);if(o.type==TokenType::GreaterEqual)return Value(*x>=*y);if(o.type==TokenType::Less)return Value(*x<*y);return Value(*x<=*y);}double x=num(a,o.lexeme),y=num(b,o.lexeme);if(o.type==TokenType::Greater)return Value(x>y);if(o.type==TokenType::GreaterEqual)return Value(x>=y);if(o.type==TokenType::Less)return Value(x<y);return Value(x<=y);}
+ if(o.type==TokenType::Spaceship)throw std::runtime_error("TypeError: <=> requires comparable values");if(o.type==TokenType::Greater||o.type==TokenType::GreaterEqual||o.type==TokenType::Less||o.type==TokenType::LessEqual){if(auto x=std::get_if<std::string>(&a.data)){auto y=std::get_if<std::string>(&b.data);if(!y)throw std::runtime_error("TypeError: incompatible comparison types");if(o.type==TokenType::Greater)return Value(*x>*y);if(o.type==TokenType::GreaterEqual)return Value(*x>=*y);if(o.type==TokenType::Less)return Value(*x<*y);return Value(*x<=*y);}double x=num(a,o.lexeme),y=num(b,o.lexeme);if(o.type==TokenType::Greater)return Value(x>y);if(o.type==TokenType::GreaterEqual)return Value(x>=y);if(o.type==TokenType::Less)return Value(x<y);return Value(x<=y);}
  if(o.type==TokenType::BitAnd)return Value(integer(a,"&")&integer(b,"&"));
  if(o.type==TokenType::BitOr)return Value(integer(a,"|")|integer(b,"|"));
  if(o.type==TokenType::BitXor)return Value(integer(a,"^")^integer(b,"^"));
@@ -223,7 +264,7 @@ if(auto m=std::get_if<Value::MapPtr>(&v.data)){auto mp=*m;if(n=="get"||n=="set"|
  throw std::runtime_error("NoMethodError: member '"+n+"' not found on "+v.type_name());}
 void Interpreter::member_set(const Value&v,const std::string&n,Value x){if(auto i=std::get_if<Value::InstancePtr>(&v.data)){(*i)->fields[n]=std::move(x);return;}if(auto m=std::get_if<Value::MapPtr>(&v.data)){(*m)->insert_or_assign(n,std::move(x));return;}throw std::runtime_error("TypeError: only instances and maps have assignable members");}
 Value Interpreter::assign_target(const ExprPtr&t,const Token&o,const Value&v){if(auto x=std::dynamic_pointer_cast<Variable>(t)){Value nv=o.type==TokenType::Equal?v:compound(env_->get(x->name),o,v);if(!env_->assign(x->name,nv))env_->define(x->name,nv);return nv;}if(auto x=std::dynamic_pointer_cast<Index>(t)){Value obj=evaluate(x->object);auto idx=(int)integer(evaluate(x->index),"index");if(auto p=std::get_if<Value::ArrayPtr>(&obj.data)){if(idx<0)idx+=(int)(*p)->size();if(idx<0||idx>=(int)(*p)->size())throw std::runtime_error("IndexError: array index out of range");(*p)->at(idx)=o.type==TokenType::Equal?v:compound((*p)->at(idx),o,v);return (*p)->at(idx);}throw std::runtime_error("TypeError: indexed assignment requires an array");}if(auto x=std::dynamic_pointer_cast<Member>(t)){Value obj=evaluate(x->object);Value nv=o.type==TokenType::Equal?v:compound(member_get(obj,x->name),o,v);member_set(obj,x->name,nv);return nv;}throw std::runtime_error("SyntaxError: left side of assignment is not assignable");}
-Value Interpreter::evaluate(const ExprPtr&e){if(auto x=std::dynamic_pointer_cast<Literal>(e)){if(std::holds_alternative<std::string>(x->value.data))return Value(interpolate(std::get<std::string>(x->value.data)));return x->value;}if(auto x=std::dynamic_pointer_cast<Variable>(e)){try{return env_->get(x->name);}catch(...){auto it=builtins_.find(x->name);if(it!=builtins_.end()){auto f=std::make_shared<Function>();f->name=x->name;f->native=it->second;return Value(f);}throw;}}if(auto x=std::dynamic_pointer_cast<ArrayExpr>(e)){Array a;for(auto&i:x->items)a.push_back(evaluate(i));return Value(std::move(a));}if(auto x=std::dynamic_pointer_cast<MapExpr>(e)){Map m;for(auto&[k,v]:x->items)m[k]=evaluate(v);return Value(std::move(m));}if(auto x=std::dynamic_pointer_cast<Index>(e)){Value o=evaluate(x->object);Value key=evaluate(x->index);long long i=key.is_number()?integer(key,"index"):0;if(auto a=std::get_if<Value::ArrayPtr>(&o.data)){if(i<0)i+=(long long)(*a)->size();if(i<0||i>=(long long)(*a)->size())throw std::runtime_error("IndexError: array index out of range");return (*a)->at((size_t)i);}if(auto m=std::get_if<Value::MapPtr>(&o.data)){if(!std::holds_alternative<std::string>(key.data))throw std::runtime_error("TypeError: map index must be a string");std::string k=std::get<std::string>(key.data);auto it=(*m)->find(k);return it==(*m)->end()?Value{}:it->second;}if(auto s=std::get_if<std::string>(&o.data)){if(i<0)i+=s->size();if(i<0||i>=(long long)s->size())throw std::runtime_error("IndexError: string index out of range");return Value(std::string(1,(*s)[i]));}throw std::runtime_error("TypeError: indexing requires array, map, or string");}if(auto x=std::dynamic_pointer_cast<Member>(e))return member_get(evaluate(x->object),x->name);if(auto x=std::dynamic_pointer_cast<ShellExpr>(e)){FILE*p=LUCY_POPEN(x->command.c_str(),"r");if(!p)throw std::runtime_error("ShellError: cannot start command");std::string o;char b[256];while(fgets(b,sizeof b,p))o+=b;int rc=LUCY_PCLOSE(p);while(!o.empty()&&(o.back()=='\n'||o.back()=='\r'))o.pop_back();if(rc!=0)throw std::runtime_error("ShellError: command failed with status "+std::to_string(rc));return Value(o);}if(auto x=std::dynamic_pointer_cast<RangeExpr>(e)){long long a=integer(evaluate(x->a),"range"),b=integer(evaluate(x->b),"range");Array r;if(a<=b)for(long long i=a;i<=(x->inclusive?b:b-1);++i)r.emplace_back(i);else for(long long i=a;i>=(x->inclusive?b:b+1);--i)r.emplace_back(i);return Value(std::move(r));}if(auto x=std::dynamic_pointer_cast<Unary>(e)){if(x->op.type==TokenType::Increment||x->op.type==TokenType::Decrement){Value old=evaluate(x->right);Token q=x->op;q.type=x->op.type==TokenType::Increment?TokenType::PlusEqual:TokenType::MinusEqual;Value nv=assign_target(x->right,q,Value(1));return x->postfix?old:nv;}Value v=evaluate(x->right);if(x->op.type==TokenType::Not)return Value(!v.is_truthy());if(x->op.type==TokenType::Minus)return Value(-num(v,"-"));if(x->op.type==TokenType::Plus)return Value(num(v,"+"));if(x->op.type==TokenType::BitNot)return Value(~integer(v,"~"));throw std::runtime_error("TypeError: invalid unary operator '"+x->op.lexeme+"'");}if(auto x=std::dynamic_pointer_cast<Binary>(e)){if(x->op.type==TokenType::And){auto a=evaluate(x->left);return Value(a.is_truthy()&&evaluate(x->right).is_truthy());}if(x->op.type==TokenType::Or){auto a=evaluate(x->left);return Value(a.is_truthy()||evaluate(x->right).is_truthy());}return binary(evaluate(x->left),x->op,evaluate(x->right));}if(auto x=std::dynamic_pointer_cast<Ternary>(e))return evaluate(x->c).is_truthy()?evaluate(x->t):evaluate(x->f);if(auto x=std::dynamic_pointer_cast<Call>(e)){Value f=evaluate(x->callee);std::vector<Value>a;std::vector<std::string> names;for(auto&i:x->args){a.push_back(evaluate(i.value));names.push_back(i.name);}return call(f,a,names);}throw std::runtime_error("RuntimeError: invalid expression");}
+Value Interpreter::evaluate(const ExprPtr&e){if(auto x=std::dynamic_pointer_cast<Literal>(e)){if(std::holds_alternative<std::string>(x->value.data))return Value(interpolate(std::get<std::string>(x->value.data)));return x->value;}if(auto x=std::dynamic_pointer_cast<Variable>(e)){try{return env_->get(x->name);}catch(...){auto it=builtins_.find(x->name);if(it!=builtins_.end()){auto f=std::make_shared<Function>();f->name=x->name;f->native=it->second;return Value(f);}throw;}}if(auto x=std::dynamic_pointer_cast<ArrayExpr>(e)){Array a;for(auto&i:x->items)a.push_back(evaluate(i));return Value(std::move(a));}if(auto x=std::dynamic_pointer_cast<MapExpr>(e)){Map m;for(auto&[k,v]:x->items)m[k]=evaluate(v);return Value(std::move(m));}if(auto x=std::dynamic_pointer_cast<Index>(e)){Value o=evaluate(x->object);Value key=evaluate(x->index);long long i=key.is_number()?integer(key,"index"):0;if(auto a=std::get_if<Value::ArrayPtr>(&o.data)){if(i<0)i+=(long long)(*a)->size();if(i<0||i>=(long long)(*a)->size())throw std::runtime_error("IndexError: array index out of range");return (*a)->at((size_t)i);}if(auto m=std::get_if<Value::MapPtr>(&o.data)){if(!std::holds_alternative<std::string>(key.data))throw std::runtime_error("TypeError: map index must be a string");std::string k=std::get<std::string>(key.data);auto it=(*m)->find(k);return it==(*m)->end()?Value{}:it->second;}if(auto s=std::get_if<std::string>(&o.data)){if(i<0)i+=s->size();if(i<0||i>=(long long)s->size())throw std::runtime_error("IndexError: string index out of range");return Value(std::string(1,(*s)[i]));}throw std::runtime_error("TypeError: indexing requires array, map, or string");}if(auto x=std::dynamic_pointer_cast<Member>(e))return member_get(evaluate(x->object),x->name);if(auto x=std::dynamic_pointer_cast<ShellExpr>(e)){FILE*p=LUCY_POPEN(x->command.c_str(),"r");if(!p)throw std::runtime_error("ShellError: cannot start command");std::string o;char b[256];while(fgets(b,sizeof b,p))o+=b;int rc=LUCY_PCLOSE(p);while(!o.empty()&&(o.back()=='\n'||o.back()=='\r'))o.pop_back();if(rc!=0)throw std::runtime_error("ShellError: command failed with status "+std::to_string(rc));return Value(o);}if(auto x=std::dynamic_pointer_cast<RangeExpr>(e)){long long a=integer(evaluate(x->a),"range"),b=integer(evaluate(x->b),"range");Array r;if(a<=b)for(long long i=a;i<=(x->inclusive?b:b-1);++i)r.emplace_back(i);else for(long long i=a;i>=(x->inclusive?b:b+1);--i)r.emplace_back(i);return Value(std::move(r));}if(auto x=std::dynamic_pointer_cast<Unary>(e)){if(x->op.type==TokenType::Increment||x->op.type==TokenType::Decrement){Value old=evaluate(x->right);Token q=x->op;q.type=x->op.type==TokenType::Increment?TokenType::PlusEqual:TokenType::MinusEqual;Value nv=assign_target(x->right,q,Value(1));return x->postfix?old:nv;}Value v=evaluate(x->right);if(x->op.type==TokenType::Not)return Value(!v.is_truthy());if(x->op.type==TokenType::Minus)return Value(-num(v,"-"));if(x->op.type==TokenType::Plus)return Value(num(v,"+"));if(x->op.type==TokenType::BitNot)return Value(~integer(v,"~"));throw std::runtime_error("TypeError: invalid unary operator '"+x->op.lexeme+"'");}if(auto x=std::dynamic_pointer_cast<Binary>(e)){if(x->op.type==TokenType::And){auto a=evaluate(x->left);return Value(a.is_truthy()&&evaluate(x->right).is_truthy());}if(x->op.type==TokenType::Or){auto a=evaluate(x->left);return Value(a.is_truthy()||evaluate(x->right).is_truthy());}return binary(evaluate(x->left),x->op,evaluate(x->right));}if(auto x=std::dynamic_pointer_cast<Ternary>(e))return evaluate(x->c).is_truthy()?evaluate(x->t):evaluate(x->f);if(auto x=std::dynamic_pointer_cast<LambdaExpr>(e)){auto f=std::make_shared<Function>();f->name="<lambda>";f->params=x->params;f->closure=env_;f->body=std::make_shared<Block>(std::vector<StmtPtr>{std::make_shared<ReturnStmt>(x->body)});return Value(f);}if(auto x=std::dynamic_pointer_cast<Call>(e)){Value f=evaluate(x->callee);std::vector<Value>a;std::vector<std::string> names;for(auto&i:x->args){a.push_back(evaluate(i.value));names.push_back(i.name);}return call(f,a,names);}throw std::runtime_error("RuntimeError: invalid expression");}
 Value Interpreter::call(const Value&v,const std::vector<Value>&a,const std::vector<std::string>&names){
  auto p=std::get_if<Value::FunctionPtr>(&v.data);
  if(!p) throw std::runtime_error("TypeError: "+v.type_name()+" is not callable");
@@ -277,8 +318,10 @@ Value Interpreter::call(const Value&v,const std::vector<Value>&a,const std::vect
  }catch(const ReturnSignal&r){env_=old;return r.value;}catch(...){env_=old;throw;}
  env_=old;return Value{};
 }
-Value Interpreter::execute(const StmtPtr&s){if(auto x=std::dynamic_pointer_cast<ExprStmt>(s)){Value v=evaluate(x->expr);if(std::holds_alternative<Value::FunctionPtr>(v.data))return call(v,{});return v;}if(auto x=std::dynamic_pointer_cast<VarDecl>(s)){auto target=x->global?globals_:env_;target->define(x->name,x->value?evaluate(x->value):Value{},x->constant);return Value{};}if(auto x=std::dynamic_pointer_cast<Assign>(s))return assign_target(x->target,x->op,evaluate(x->value));if(auto x=std::dynamic_pointer_cast<Block>(s)){auto old=env_;env_=make_environment(old);try{Value last;for(auto&i:x->statements)last=execute(i);env_=old;return last;}catch(...){env_=old;throw;}}if(auto x=std::dynamic_pointer_cast<IfStmt>(s)){if(evaluate(x->condition).is_truthy())return execute(x->then_branch);for(auto&e:x->else_ifs)if(evaluate(e.first).is_truthy())return execute(e.second);return x->else_branch?execute(x->else_branch):Value{};}if(auto x=std::dynamic_pointer_cast<WhileStmt>(s)){size_t g=0;while(evaluate(x->condition).is_truthy()){try{execute(x->body);}catch(BreakSignal&){break;}catch(ContinueSignal&){ }if(++g>10000000)throw std::runtime_error("LoopError: iteration limit exceeded");}return Value{};}if(auto x=std::dynamic_pointer_cast<ForStmt>(s)){auto v=evaluate(x->iterable);auto a=std::get_if<Value::ArrayPtr>(&v.data);if(!a)throw std::runtime_error("TypeError: for/foreach expects an array or range");auto old=env_;env_=make_environment(old);try{for(auto&item:**a){if(env_->local(x->name))env_->assign(x->name,item);else env_->define(x->name,item);try{execute(x->body);}catch(BreakSignal&){break;}catch(ContinueSignal&){}}env_=old;}catch(...){env_=old;throw;}return Value{};}if(auto x=std::dynamic_pointer_cast<LoopStmt>(s)){size_t g=0;while(true){try{execute(x->body);}catch(BreakSignal&){break;}catch(ContinueSignal&){ }if(++g>10000000)throw std::runtime_error("LoopError: loop iteration limit exceeded");}return Value{};}if(auto x=std::dynamic_pointer_cast<FunctionStmt>(s)){auto f=std::make_shared<Function>();f->name=x->name;f->params=x->params;f->body=x->body;f->closure=env_;env_->define(x->name,Value(f));return Value{};}if(auto x=std::dynamic_pointer_cast<ClassStmt>(s)){auto c=std::make_shared<Class>();c->name=x->name;c->base=x->base;if(!x->base.empty()){Value b=env_->get(x->base);c->parent=std::get<Value::ClassPtr>(b.data);}for(auto&m:x->methods){auto f=std::make_shared<Function>();f->name=m->name;f->params=m->params;f->body=m->body;f->closure=env_;c->methods[f->name]=Value(f);}env_->define(x->name,Value(c));return Value{};}if(auto x=std::dynamic_pointer_cast<ReturnStmt>(s))throw ReturnSignal(x->value?evaluate(x->value):Value{});if(std::dynamic_pointer_cast<BreakStmt>(s))throw BreakSignal{};if(std::dynamic_pointer_cast<ContinueStmt>(s))throw ContinueSignal{};if(auto x=std::dynamic_pointer_cast<ImportStmt>(s)){import_module(*x);return Value{};}if(auto x=std::dynamic_pointer_cast<ThrowStmt>(s))throw std::runtime_error("Exception: "+evaluate(x->value).to_string());if(auto x=std::dynamic_pointer_cast<TryStmt>(s)){try{execute(x->body);}catch(const std::exception&e){if(x->catch_body && (x->catch_type.empty()||x->catch_type=="Exception"||std::string(e.what()).find(x->catch_type+":")!=std::string::npos)){if(!x->catch_name.empty())env_->define(x->catch_name,Value(std::string(e.what())));execute(x->catch_body);}else{if(x->finally_body)execute(x->finally_body);throw;}}if(x->finally_body)execute(x->finally_body);return Value{};}throw std::runtime_error("RuntimeError: unknown statement");}
+Value Interpreter::execute(const StmtPtr&s){if(auto x=std::dynamic_pointer_cast<ExprStmt>(s)){Value v=evaluate(x->expr);if(std::holds_alternative<Value::FunctionPtr>(v.data))return call(v,{});return v;}if(auto x=std::dynamic_pointer_cast<VarDecl>(s)){auto target=x->global?globals_:env_;target->define(x->name,x->value?evaluate(x->value):Value{},x->constant);return Value{};}if(auto x=std::dynamic_pointer_cast<Assign>(s))return assign_target(x->target,x->op,evaluate(x->value));if(auto x=std::dynamic_pointer_cast<Block>(s)){auto old=env_;env_=make_environment(old);try{Value last;for(auto&i:x->statements)last=execute(i);env_=old;return last;}catch(...){env_=old;throw;}}if(auto x=std::dynamic_pointer_cast<IfStmt>(s)){if(evaluate(x->condition).is_truthy())return execute(x->then_branch);for(auto&e:x->else_ifs)if(evaluate(e.first).is_truthy())return execute(e.second);return x->else_branch?execute(x->else_branch):Value{};}if(auto x=std::dynamic_pointer_cast<WhileStmt>(s)){size_t g=0;while(evaluate(x->condition).is_truthy()){try{execute(x->body);}catch(BreakSignal&){break;}catch(ContinueSignal&){ }if(++g>10000000)throw std::runtime_error("LoopError: iteration limit exceeded");}return Value{};}if(auto x=std::dynamic_pointer_cast<DoWhileStmt>(s)){size_t g=0;do{try{execute(x->body);}catch(BreakSignal&){break;}catch(ContinueSignal&){}if(++g>10000000)throw std::runtime_error("LoopError: iteration limit exceeded");}while(evaluate(x->condition).is_truthy());return Value{};}if(auto x=std::dynamic_pointer_cast<SwitchStmt>(s)){Value target=evaluate(x->value);for(auto&c:x->cases){if(equal(target,evaluate(c.first))){try{execute(c.second);}catch(BreakSignal&){}return Value{};}}if(x->default_branch){try{execute(x->default_branch);}catch(BreakSignal&){} }return Value{};}if(auto x=std::dynamic_pointer_cast<ForStmt>(s)){auto v=evaluate(x->iterable);auto a=std::get_if<Value::ArrayPtr>(&v.data);if(!a)throw std::runtime_error("TypeError: for/foreach expects an array or range");auto old=env_;env_=make_environment(old);try{for(auto&item:**a){if(env_->local(x->name))env_->assign(x->name,item);else env_->define(x->name,item);try{execute(x->body);}catch(BreakSignal&){break;}catch(ContinueSignal&){}}env_=old;}catch(...){env_=old;throw;}return Value{};}if(auto x=std::dynamic_pointer_cast<LoopStmt>(s)){size_t g=0;while(true){try{execute(x->body);}catch(BreakSignal&){break;}catch(ContinueSignal&){ }if(++g>10000000)throw std::runtime_error("LoopError: loop iteration limit exceeded");}return Value{};}if(auto x=std::dynamic_pointer_cast<FunctionStmt>(s)){auto f=std::make_shared<Function>();f->name=x->name;f->params=x->params;f->body=x->body;f->closure=env_;env_->define(x->name,Value(f));return Value{};}if(auto x=std::dynamic_pointer_cast<ClassStmt>(s)){auto c=std::make_shared<Class>();c->name=x->name;c->base=x->base;if(!x->base.empty()){Value b=env_->get(x->base);c->parent=std::get<Value::ClassPtr>(b.data);}for(auto&m:x->methods){auto f=std::make_shared<Function>();f->name=m->name;f->params=m->params;f->body=m->body;f->closure=env_;c->methods[f->name]=Value(f);}env_->define(x->name,Value(c));return Value{};}if(auto x=std::dynamic_pointer_cast<ReturnStmt>(s))throw ReturnSignal(x->value?evaluate(x->value):Value{});if(std::dynamic_pointer_cast<BreakStmt>(s))throw BreakSignal{};if(std::dynamic_pointer_cast<ContinueStmt>(s))throw ContinueSignal{};if(auto x=std::dynamic_pointer_cast<ImportStmt>(s)){import_module(*x);return Value{};}if(auto x=std::dynamic_pointer_cast<ThrowStmt>(s))throw std::runtime_error("Exception: "+evaluate(x->value).to_string());if(auto x=std::dynamic_pointer_cast<TryStmt>(s)){try{execute(x->body);}catch(const std::exception&e){if(x->catch_body && (x->catch_type.empty()||x->catch_type=="Exception"||std::string(e.what()).find(x->catch_type+":")!=std::string::npos)){if(!x->catch_name.empty())env_->define(x->catch_name,Value(std::string(e.what())));execute(x->catch_body);}else{if(x->finally_body)execute(x->finally_body);throw;}}if(x->finally_body)execute(x->finally_body);return Value{};}throw std::runtime_error("RuntimeError: unknown statement");}
 void Interpreter::import_module(const ImportStmt&x){auto path=resolve_module(x.module);if(std::find(import_stack_.begin(),import_stack_.end(),path)!=import_stack_.end())throw std::runtime_error("ImportError: circular import detected");import_stack_.push_back(path);try{Lexer l(read_file(path));Parser p(l.scan());auto prog=p.parse();auto old=env_;auto file=current_file_;auto mod=make_environment(globals_);env_=mod;current_file_=path;run(prog);
+ // Ordinary imports expose a single module object (for example `import fs` -> `fs.read`).
+ // Nothing is leaked into the caller scope; use `from module import name` for direct imports.
  // Keep the module environment alive so functions and classes can continue
  // resolving names defined by the module itself. Environments are owned by the
  // interpreter and cleared during interpreter destruction, which also breaks
@@ -292,23 +335,17 @@ void Interpreter::import_module(const ImportStmt&x){auto path=resolve_module(x.m
      const std::string alias =
          x.alias.empty() ? fs::path(path).stem().string() : x.alias;
 
-     auto named = mod->values().find(alias);
-     if (named != mod->values().end() &&
-         std::holds_alternative<Value::InstancePtr>(named->second.value.data)) {
-         old->define(alias, named->second.value);
-     } else {
-         // Build a module object containing the module's public bindings.
-         auto object = std::make_shared<Instance>();
-         auto klass = std::make_shared<Class>();
-         klass->name = alias;
-         object->klass = klass;
-
-         for (auto& [name, entry] : mod->values()) {
+     auto object = std::make_shared<Instance>();
+     auto klass = std::make_shared<Class>();
+     klass->name = alias;
+     object->klass = klass;
+     for (auto& [name, entry] : mod->values()) {
+         if (std::holds_alternative<Value::FunctionPtr>(entry.value.data) &&
+             (name.empty() || name[0] != '_')) {
              object->fields[name] = entry.value;
          }
-
-         old->define(alias, Value(object));
      }
+     old->define(alias, Value(object));
  }env_=old;current_file_=file;import_stack_.pop_back();}catch(...){import_stack_.pop_back();throw;}}
 static fs::path executable_path(){
 #ifdef _WIN32
@@ -363,7 +400,7 @@ std::string Interpreter::read_file(const std::string&p)const{std::ifstream f(p);
 Value Interpreter::run(const std::vector<StmtPtr>&s,bool echo){Value last;for(auto&i:s){last=execute(i);if(echo&&!std::holds_alternative<Nil>(last.data))std::cout<<last.to_string()<<'\n';}return last;}
 std::vector<std::string> Interpreter::completion_candidates(const std::string& input) const {
     static const std::vector<std::string> keywords = {
-        "if", "else", "while", "for", "foreach", "loop", "function", "def",
+        "if", "else", "while", "do", "for", "foreach", "loop", "switch", "case", "default", "function", "def", "lambda",
         "class", "return", "break", "continue", "end", "import", "from", "as",
         "const", "global", "in", "and", "or", "not", "new", "self", "super",
         "try", "catch", "finally", "throw", "true", "false", "nil"
@@ -372,11 +409,11 @@ std::vector<std::string> Interpreter::completion_candidates(const std::string& i
     static const std::vector<std::string> modules = {
         "collections", "csv", "datetime", "dir", "encoding", "file", "http", "io",
         "json", "math", "os", "path", "process", "random", "regex", "sqlite",
-        "string", "sys", "time"
+        "string", "sys", "time", "repl", "flow", "data", "result"
     };
 
     static const std::unordered_map<std::string, std::vector<std::string>> module_members = {
-        {"collections", {"first", "last", "reverse", "contains"}},
+        {"collections", {"first", "last", "reverse", "contains", "count", "index", "compact", "unique", "flatten", "sum", "min", "max"}},
         {"csv", {"parse", "stringify"}},
         {"datetime", {"now", "from_timestamp", "format"}},
         {"dir", {"pwd", "chdir", "exists", "entries", "files", "dirs", "glob", "walk", "mkdir", "rmdir", "empty", "copy"}},
@@ -394,7 +431,26 @@ std::vector<std::string> Interpreter::completion_candidates(const std::string& i
         {"sqlite", {"open"}},
         {"string", {"capitalize", "reverse", "repeat"}},
         {"sys", {"version", "platform", "cwd", "env", "argv"}},
-        {"time", {"milliseconds"}}
+        {"time", {"now", "strptime", "format", "year", "month", "day", "hour", "minute", "second", "add", "subtract", "plus", "minus", "compare", "succ"}},
+        {"repl", {"banner", "prompt", "commands", "topics", "help"}},
+        {"flow", {"pipe", "tap", "branch", "repeat"}},
+        {"data", {"pick", "omit", "merge", "values", "zip"}},
+        {"result", {"ok", "err", "success", "unwrap", "message"}},
+        {"date", {"parse", "strptime", "format", "add", "subtract", "next_day", "prev_day", "succ", "shift_months", "add_months", "subtract_months", "compare"}},
+        {"digest", {"digest", "hexdigest", "base64digest", "file"}},
+        {"socket", {"new", "connect", "bind", "listen", "accept", "recv", "send", "close"}},
+        {"net_http", {"get", "put", "delete", "head", "patch", "post", "request", "start", "proxy"}},
+        {"resolv", {"getaddress", "getname"}},
+        {"fileutils", {"chmod", "chown", "ln", "link", "symlink"}},
+        {"stringscanner", {"new", "scan", "scan_until", "skip", "skip_until", "check", "check_until", "match?", "matched", "matched_size", "pre_match", "post_match"}},
+        {"set", {"new", "add", "delete", "include?", "member?", "each", "size", "length", "empty?", "clear", "map", "select", "reject", "merge", "subset?", "superset?", "intersect?", "union", "intersection", "difference", "symmetric_difference"}},
+        {"yaml", {"load", "safe_load", "dump", "load_file"}},
+        {"option_parser", {"new", "banner", "separator", "version", "program_name", "on", "parse", "parse!", "help", "summarize", "abort"}},
+        {"logger", {"new", "debug", "info", "warn", "error", "fatal", "add", "log", "level", "set_level", "debug?", "info?", "warn?", "error?", "fatal?"}},
+        {"timeout", {"timeout"}},
+        {"benchmark", {"measure", "realtime"}},
+        {"signal", {"trap", "list", "signame"}},
+        {"process", {"run", "capture", "success", "output", "ppid", "spawn", "wait", "waitpid", "kill", "uid", "gid", "euid", "egid", "groups", "clock_gettime"}}
     };
 
     static const std::vector<std::string> array_members = {
@@ -501,8 +557,31 @@ std::vector<std::string> Interpreter::completion_candidates(const std::string& i
 
 void Interpreter::repl() {
     ReplLineEditor editor;
-    std::cout << "Lucy 1.0.0 Interactive REPL\n";
-    std::cout << "Type :help for help, :quit or Ctrl-D to exit.\n\n";
+
+    auto eval_repl_library = [this](const std::string& source) -> Value {
+        Lexer lexer(source);
+        Parser parser(lexer.scan());
+        return run(parser.parse(), false);
+    };
+
+    bool repl_library_loaded = false;
+    try {
+        eval_repl_library("import repl\nfrom repl import help\n");
+        repl_library_loaded = true;
+    } catch (const std::exception& error) {
+        std::cerr << "Warning: REPL library could not be loaded: " << error.what() << '\n';
+    }
+
+    if (repl_library_loaded) {
+        try {
+            Value banner = eval_repl_library("repl.banner()\n");
+            std::cout << banner.to_string() << "\n\n";
+        } catch (const std::exception&) {
+            std::cout << "Lucy 1.0.1 Interactive REPL\n\n";
+        }
+    } else {
+        std::cout << "Lucy 1.0.1 Interactive REPL\n\n";
+    }
 
     std::string buffer;
     int block_depth = 0;
@@ -518,8 +597,8 @@ void Interpreter::repl() {
         stream >> first;
 
         if (first == "if" || first == "while" || first == "for" || first == "foreach" ||
-            first == "loop" || first == "function" || first == "def" || first == "class" ||
-            first == "try") {
+            first == "loop" || first == "switch" || first == "do" || first == "function" ||
+            first == "def" || first == "class" || first == "try") {
             ++block_depth;
         } else if (first == "end") {
             block_depth = std::max(0, block_depth - 1);
@@ -527,7 +606,16 @@ void Interpreter::repl() {
     };
 
     while (true) {
-        const std::string prompt = block_depth == 0 ? ">>> " : "... ";
+        std::string prompt = block_depth == 0 ? ">>> " : "... ";
+        if (repl_library_loaded) {
+            try {
+                Value custom_prompt = eval_repl_library(
+                    "repl.prompt(" + std::to_string(block_depth) + ")\n");
+                prompt = custom_prompt.to_string();
+            } catch (const std::exception&) {
+                // Keep the native fallback prompt if the editable REPL library fails.
+            }
+        }
         std::string line;
 
         if (!editor.read_line(prompt, line, [this](const std::string& input) {
@@ -540,25 +628,29 @@ void Interpreter::repl() {
         if (block_depth == 0 && line == ":exit") break;
 
         if (block_depth == 0 && line == ":help") {
-            std::cout
-                << "Commands:\n"
-                << "  :help       Show this help\n"
-                << "  :clear      Clear the current input buffer\n"
-                << "  :history    Show command history\n"
-                << "  :version    Show Lucy version\n"
-                << "  :quit       Exit the REPL\n"
-                << "  Ctrl-D      Exit the REPL\n"
-                << "\n"
-                << "Editing:\n"
-                << "  Up/Down     Navigate history\n"
-                << "  Left/Right  Move the cursor\n"
-                << "  Home/End    Move to line boundaries\n"
-                << "  Tab         Complete names and members\n";
+            if (repl_library_loaded) {
+                try {
+                    eval_repl_library("repl.help()\n");
+                } catch (const std::exception& error) {
+                    std::cerr << error.what() << '\n';
+                }
+            } else {
+                std::cout << "REPL help library is unavailable.\n";
+            }
             continue;
         }
 
         if (block_depth == 0 && line == ":version") {
-            std::cout << "1.0.0\n";
+            if (repl_library_loaded) {
+                try {
+                    Value version = eval_repl_library("repl.version()\n");
+                    std::cout << version.to_string() << '\n';
+                } catch (const std::exception&) {
+                    std::cout << "1.0.1\n";
+                }
+            } else {
+                std::cout << "1.0.1\n";
+            }
             continue;
         }
 

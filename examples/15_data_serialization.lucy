@@ -1,0 +1,6 @@
+import data
+
+value = {name: "Lucy", features: ["lambda", "switch", "repl"]}
+json_text = data.encode value, "json"
+print json_text
+print data.decode json_text, "json"

@@ -13,3 +13,12 @@ class Random
 end
 
 random = Random.new()
+
+# Flat public random API.
+def int(low, high); return random_int(low, high); end
+def float(); return random_float(); end
+def bool(); return random_int(0, 1) == 1; end
+def choice(items); return Random.new().choice(items); end
+def shuffle(items); result = []; for item in items; result.push(item); end; i = result.length() - 1; while i > 0; j = random_int(0, i); temp = result[i]; result[i] = result[j]; result[j] = temp; i -= 1; end; return result; end
+def sample(items, count); result = []; pool = shuffle(items); i = 0; while i < count and i < pool.length(); result.push(pool[i]); i += 1; end; return result; end
+

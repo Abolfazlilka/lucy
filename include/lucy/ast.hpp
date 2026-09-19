@@ -28,9 +28,12 @@ struct VarDecl:Stmt{std::string name;ExprPtr value;bool constant=false,global=fa
 struct Block:Stmt{std::vector<StmtPtr>statements;explicit Block(std::vector<StmtPtr>s):statements(std::move(s)){} };
 struct IfStmt:Stmt{ExprPtr condition;StmtPtr then_branch;std::vector<std::pair<ExprPtr,StmtPtr>>else_ifs;StmtPtr else_branch;IfStmt(ExprPtr c,StmtPtr t,std::vector<std::pair<ExprPtr,StmtPtr>>e,StmtPtr x):condition(std::move(c)),then_branch(std::move(t)),else_ifs(std::move(e)),else_branch(std::move(x)){} };
 struct WhileStmt:Stmt{ExprPtr condition;StmtPtr body;WhileStmt(ExprPtr c,StmtPtr b):condition(std::move(c)),body(std::move(b)){} };
+struct DoWhileStmt:Stmt{StmtPtr body;ExprPtr condition;DoWhileStmt(StmtPtr b,ExprPtr c):body(std::move(b)),condition(std::move(c)){} };
 struct ForStmt:Stmt{std::string name;ExprPtr iterable;StmtPtr body;ForStmt(std::string n,ExprPtr i,StmtPtr b):name(std::move(n)),iterable(std::move(i)),body(std::move(b)){} };
 struct LoopStmt:Stmt{StmtPtr body;explicit LoopStmt(StmtPtr b):body(std::move(b)){} };
+struct SwitchStmt:Stmt{ExprPtr value;std::vector<std::pair<ExprPtr,StmtPtr>>cases;StmtPtr default_branch;SwitchStmt(ExprPtr v,std::vector<std::pair<ExprPtr,StmtPtr>>c,StmtPtr d):value(std::move(v)),cases(std::move(c)),default_branch(std::move(d)){} };
 struct Parameter{std::string name;ExprPtr default_value;bool variadic=false;Parameter(std::string n,ExprPtr d=nullptr,bool v=false):name(std::move(n)),default_value(std::move(d)),variadic(v){} };
+struct LambdaExpr:Expr{std::vector<Parameter>params;ExprPtr body;LambdaExpr(std::vector<Parameter>p,ExprPtr b):params(std::move(p)),body(std::move(b)){}};
 struct FunctionStmt:Stmt{std::string name;std::vector<Parameter>params;StmtPtr body;FunctionStmt(std::string n,std::vector<Parameter>p,StmtPtr b):name(std::move(n)),params(std::move(p)),body(std::move(b)){} };
 struct ReturnStmt:Stmt{ExprPtr value;explicit ReturnStmt(ExprPtr v):value(std::move(v)){} };
 struct ImportStmt:Stmt{std::string module,alias;std::vector<std::string>names;bool selective=false;ImportStmt(std::string m,std::vector<std::string>n={},bool s=false,std::string a=""):module(std::move(m)),alias(std::move(a)),names(std::move(n)),selective(s){} };

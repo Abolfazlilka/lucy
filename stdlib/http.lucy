@@ -1,12 +1,220 @@
-# HTTP client built on the host curl implementation.
-class HTTP
-    def get(url)
-        return __http_get(url)
+# Lucy network client. HTTP, sockets, and name resolution are grouped here so one network library covers the common stack.
+# HTTP client with Ruby-inspired method names.
+class HTTPRequest
+    def initialize(method, url, body = "")
+        self.method = method
+        self.url = url
+        self.body = body
     end
 
-    def post(url, body = "")
-        return __http_post(url, body)
+    def execute()
+        return __http_request(self.method, self.url, self.body)
     end
 end
 
+class HTTP
+    def initialize(url = "", proxy = nil)
+        self.url = url
+        self.proxy_url = proxy
+    end
+
+    def get(path = "")
+        return __http_request("GET", self.url + path, "")
+    end
+
+    def put(path = "", body = "")
+        return __http_request("PUT", self.url + path, body)
+    end
+
+    def delete(path = "")
+        return __http_request("DELETE", self.url + path, "")
+    end
+
+    def head(path = "")
+        return __http_request("HEAD", self.url + path, "")
+    end
+
+    def patch(path = "", body = "")
+        return __http_request("PATCH", self.url + path, body)
+    end
+
+    def post(path = "", body = "")
+        return __http_request("POST", self.url + path, body)
+    end
+
+    def request(method, path = "", body = "")
+        return __http_request(method, self.url + path, body)
+    end
+
+    def start()
+        return self
+    end
+
+    def proxy(proxy_url)
+        self.proxy_url = proxy_url
+        return self
+    end
+end
+
+# Simple top-level helpers for one-shot requests.
+def get(url)
+    return __http_request("GET", url, "")
+end
+
+def post(url, body = "")
+    return __http_request("POST", url, body)
+end
+
+def put(url, body = "")
+    return __http_request("PUT", url, body)
+end
+
+def delete(url)
+    return __http_request("DELETE", url, "")
+end
+
+def head(url)
+    return __http_request("HEAD", url, "")
+end
+
+def patch(url, body = "")
+    return __http_request("PATCH", url, body)
+end
+
+
+# Low-level TCP/UDP socket operations.
+# TCP socket API.
+class Socket
+    def initialize()
+        self.native = __socket_new()
+    end
+
+    def connect(host, port)
+        return __socket_connect(self.native, host, port)
+    end
+
+    def bind(host, port)
+        return __socket_bind(self.native, host, port)
+    end
+
+    def listen(backlog = 16)
+        return __socket_listen(self.native, backlog)
+    end
+
+    def accept()
+        client = Socket.new()
+        client.native = __socket_accept(self.native)
+        return client
+    end
+
+    def recv(size = 4096)
+        return __socket_recv(self.native, size)
+    end
+
+    def send(data)
+        return __socket_send(self.native, data)
+    end
+
+    def close()
+        return __socket_close(self.native)
+    end
+end
+
+class SocketAPI
+    def new()
+        return Socket.new()
+    end
+end
+
+socket = SocketAPI.new()
+
+# Hostname and address lookup.
+# DNS resolution helpers.
+class Resolv
+    def getaddress(host)
+        return __resolv_getaddress(host)
+    end
+
+    def getname(address)
+        return __resolv_getname(address)
+    end
+end
+
+resolv = Resolv.new()
+
+# Unified network facade. The same object exposes HTTP plus low-level networking.
 http = HTTP.new()
+
+# Flat public network API. HTTP, sockets and DNS are all one level under `http`.
+def request(method, url, body = "")
+    return __http_request(method, url, body)
+end
+
+def get(url)
+    return request("GET", url)
+end
+
+def post(url, body = "")
+    return request("POST", url, body)
+end
+
+def put(url, body = "")
+    return request("PUT", url, body)
+end
+
+def delete(url)
+    return request("DELETE", url)
+end
+
+def head(url)
+    return request("HEAD", url)
+end
+
+def patch(url, body = "")
+    return request("PATCH", url, body)
+end
+
+def client(url = "", proxy = nil)
+    return HTTP.new(url, proxy)
+end
+
+def connect(host, port)
+    s = Socket.new()
+    s.connect(host, port)
+    return s
+end
+
+def bind(host, port)
+    s = Socket.new()
+    s.bind(host, port)
+    return s
+end
+
+def listen(socket, backlog = 16)
+    return socket.listen(backlog)
+end
+
+def accept(socket)
+    return socket.accept()
+end
+
+def recv(socket, size = 4096)
+    return socket.recv(size)
+end
+
+def send(socket, data)
+    return socket.send(data)
+end
+
+def close(socket)
+    return socket.close()
+end
+
+def resolve(host)
+    return __resolv_getaddress(host)
+end
+
+def reverse(address)
+    return __resolv_getname(address)
+end
+

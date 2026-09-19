@@ -1,0 +1,15 @@
+value = 3
+switch value
+    case 1
+        print "one"
+    case 3
+        print "three"
+    default
+        print "other"
+end
+
+i = 0
+do
+    print i
+    i += 1
+while i < 3

@@ -1,5 +1,22 @@
 # Lucy Development History
 
+## 1.0.1 — Language and Standard Library Consolidation
+
+### Added
+
+- Expression lambdas with `lambda(x) => expression` syntax and closure capture.
+- `switch`, `case`, and `default` control flow with `break` support.
+- `do ... while` loops that always execute their body at least once.
+- Semicolon statement separators for multiple statements on one line.
+- Time and Date operator support for `+`, `-`, and `<=>`.
+- Set operator support for `|`, `&`, `^`, and `-`.
+- Set predicate aliases `subset?`, `superset?`, and `intersect?`.
+
+### Changed
+
+- Ordinary imports expose a flat module API; use `module.function()` or `from module import function`. Implementation classes are available only through explicit selective imports.
+- Standard-library documentation now distinguishes canonical APIs from compatibility aliases instead of treating every same-named method as a separate global function.
+
 This document records additions and improvements that are part of the preserved Lucy release history. It focuses on capabilities added to the language and runtime rather than internal experiments.
 
 ## 1.0.0 — CLI and Documentation
@@ -23,12 +40,12 @@ This document records additions and improvements that are part of the preserved 
 ### Added
 
 - The Phase 2 standard-library layer.
-- Regular expressions through the `regex` module.
-- A JSON parser and serializer through `json`.
-- Unix-millisecond date/time support through `datetime`.
-- Process execution and output capture through `process`.
-- Base64, hexadecimal, and URL encoding through `encoding`.
-- CSV parsing and serialization through `csv`.
+- Regular expressions through the `text` module.
+- A JSON parser and serializer through `data`.
+- Unix-millisecond date/time support through `time`.
+- Process execution and output capture through `system`.
+- Base64, hexadecimal, and URL encoding through `text`.
+- CSV parsing and serialization through `data`.
 - HTTP GET and POST support through `http`.
 - Optional SQLite support through `sqlite` when SQLite3 is found during the build.
 - The Lucy language logo in the distribution assets.
@@ -53,11 +70,11 @@ This document records additions and improvements that are part of the preserved 
 ### Added
 
 - Single-quoted strings with escaping and interpolation.
-- A substantially expanded `file` standard-library module.
-- A substantially expanded `dir` standard-library module.
-- The `path` standard-library module.
-- Expanded `os` APIs for environment, process, platform, CPU, home-directory, temporary-directory, and command-detection operations.
-- A focused `io` console module.
+- A substantially expanded `fs` standard-library module.
+- A substantially expanded `fs` standard-library module.
+- The `fs` standard-library module.
+- Expanded `system` APIs for environment, process, platform, CPU, home-directory, temporary-directory, and command-detection operations.
+- A focused `fs` console module.
 - Filesystem regression tests.
 - Updated editor syntax definitions for single-quoted strings.
 - Improved global installation layout and documentation.
@@ -155,3 +172,12 @@ This document records additions and improvements that are part of the preserved 
 - Portable C++ implementation without third-party dependencies.
 
 > The repository's earliest preserved release is 0.4.0. Earlier release notes are not present in the current project history, so no unsupported chronology is claimed here.
+
+
+## 1.0.1 documentation and identity refinement
+
+- Moved REPL help content from the C++ runtime into `stdlib/repl.lucy`.
+- Made REPL banner, version presentation, prompts, command metadata, topics, and help renderer Lucy-editable.
+- Added `docs/API.md` as an exhaustive implementation-facing API inventory.
+- Added Lucy-native `flow`, `data`, and `result` modules without removing compatibility-oriented APIs.
+- Kept version 1.0.1 unchanged.

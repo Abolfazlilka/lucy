@@ -1,0 +1,321 @@
+# Lucy-native data shaping helpers for maps and arrays.
+
+class Data
+    def encode(value, format = "json")
+        if format == "json"
+            return stringify(value)
+        end
+        if format == "yaml"
+            return yaml_dump(value)
+        end
+        throw "DataError: unsupported format"
+    end
+
+    def decode(text, format = "json")
+        if format == "json"
+            return parse(text)
+        end
+        if format == "yaml"
+            return yaml_load(text)
+        end
+        throw "DataError: unsupported format"
+    end
+    def pick(source, keys)
+        _data_result = {}
+        for key in keys
+            if source.has(key)
+                _data_result.set(key, source.get(key))
+            end
+        end
+        return _data_result
+    end
+
+    def omit(source, keys)
+        _data_result = {}
+        for key in source.keys()
+            if !keys.contains(key)
+                _data_result.set(key, source.get(key))
+            end
+        end
+        return _data_result
+    end
+
+    def merge(left, right)
+        _data_result = {}
+        for key in left.keys()
+            _data_result.set(key, left.get(key))
+        end
+        for key in right.keys()
+            _data_result.set(key, right.get(key))
+        end
+        return _data_result
+    end
+
+    def values(source, keys)
+        _data_values = []
+        for key in keys
+            _data_values.push(source.get(key))
+        end
+        return _data_values
+    end
+
+    def zip(keys, values)
+        _data_result = {}
+        i = 0
+        while i < keys.length()
+            if i < values.length()
+                _data_result.set(keys[i], values[i])
+            end
+            i += 1
+        end
+        return _data_result
+    end
+end
+
+
+
+# JSON parsing and serialization.
+class JSON
+    def parse(text)
+        return __json_parse(text)
+    end
+
+    def stringify(value)
+        return __json_stringify(value)
+    end
+
+    def pretty_generate(value)
+        return __json_pretty(value)
+    end
+
+    def fast_generate(value)
+        return self.stringify(value)
+    end
+
+    def load(path)
+        import fs
+        return parse(fs.read(path))
+    end
+
+    def dump(path, value)
+        import fs
+        return fs.write(path, self.stringify(value))
+    end
+end
+
+json = JSON.new()
+
+# YAML configuration helpers for the common YAML subset supported by Lucy.
+class YAML
+    def load(text)
+        return __yaml_load(text)
+    end
+
+    def safe_load(text)
+        return __yaml_load(text)
+    end
+
+    def dump(value)
+        return __yaml_dump(value)
+    end
+
+    def load_file(path)
+        return __yaml_load_file(path)
+    end
+end
+
+yaml = YAML.new()
+
+# CSV parsing and serialization.
+class CSV
+    def parse(text, delimiter = ",")
+        return __csv_parse(text, delimiter)
+    end
+
+    def stringify(rows, delimiter = ",")
+        return __csv_stringify(rows, delimiter)
+    end
+
+    def load(path, delimiter = ",")
+        import fs
+        return self.parse(fs.read(path), delimiter)
+    end
+
+    def dump(path, rows, delimiter = ",")
+        import fs
+        return fs.write(path, self.stringify(rows, delimiter))
+    end
+end
+
+csv = CSV.new()
+
+# Unified serialization helpers.
+def encode(value, format = "json")
+    if format == "json"
+        return stringify(value)
+    end
+    if format == "yaml"
+        return yaml_dump(value)
+    end
+    throw "DataError: unsupported format"
+end
+
+def decode(text, format = "json")
+    if format == "json"
+        return parse(text)
+    end
+    if format == "yaml"
+        return yaml_load(text)
+    end
+    throw "DataError: unsupported format"
+end
+
+# Unified data facade. Shaping and serialization are available from one object.
+data = Data.new()
+
+# Flat aggregate helpers.
+def min(source)
+    if source.length() == 0
+        return nil
+    end
+    result = source[0]
+    for item in source
+        if item < result
+            result = item
+        end
+    end
+    return result
+end
+
+def max(source)
+    if source.length() == 0
+        return nil
+    end
+    result = source[0]
+    for item in source
+        if item > result
+            result = item
+        end
+    end
+    return result
+end
+
+# Flat public data API. Serialization and data shaping use one-level calls.
+def map(source, callback)
+    result = []
+    for item in source
+        result.push(callback(item))
+    end
+    return result
+end
+
+def filter(source, callback)
+    result = []
+    for item in source
+        if callback(item)
+            result.push(item)
+        end
+    end
+    return result
+end
+
+def reduce(source, callback, initial = nil)
+    if source.length() == 0
+        return initial
+    end
+    accumulator = initial
+    index = 0
+    if accumulator == nil
+        accumulator = source[0]
+        index = 1
+    end
+    while index < source.length()
+        accumulator = callback(accumulator, source[index])
+        index += 1
+    end
+    return accumulator
+end
+
+def unique(source)
+    result = []
+    for item in source
+        if !result.contains(item)
+            result.push(item)
+        end
+    end
+    return result
+end
+
+def flatten(source)
+    result = []
+    for item in source
+        if type(item) == "array"
+            nested = flatten(item)
+            for value in nested
+                result.push(value)
+            end
+        else
+            result.push(item)
+        end
+    end
+    return result
+end
+
+def pick(source, keys)
+    return Data.new().pick(source, keys)
+end
+
+def omit(source, keys)
+    return Data.new().omit(source, keys)
+end
+
+def merge(left, right)
+    return Data.new().merge(left, right)
+end
+
+def values(source, keys)
+    return Data.new().values(source, keys)
+end
+
+def zip(keys, values)
+    return Data.new().zip(keys, values)
+end
+
+def parse(text)
+    return __json_parse(text)
+end
+
+def stringify(value)
+    return __json_stringify(value)
+end
+
+def pretty(value)
+    return __json_pretty(value)
+end
+
+def json_read(path)
+    import fs
+    return parse(fs.read(path))
+end
+
+def json_write(path, value)
+    import fs
+    return fs.write(path, stringify(value))
+end
+
+def csv_parse(text, delimiter = ",")
+    return __csv_parse(text, delimiter)
+end
+
+def csv_stringify(rows, delimiter = ",")
+    return __csv_stringify(rows, delimiter)
+end
+
+def yaml_load(text)
+    return __yaml_load(text)
+end
+
+def yaml_dump(value)
+    return __yaml_dump(value)
+end
+

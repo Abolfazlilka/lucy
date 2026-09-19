@@ -75,7 +75,7 @@ end
 
 ## External commands
 
-Backticks and `process` invoke host commands. Their behavior therefore depends on the operating system and installed command-line tools.
+Backticks and `system` invoke host commands. Their behavior therefore depends on the operating system and installed command-line tools.
 
 Never place untrusted data directly into shell command strings without appropriate validation and escaping.
 

@@ -1,0 +1,228 @@
+# Lucy application toolkit. CLI configuration, logging, benchmarking, timeout helpers, and templates.
+
+# Simple command-line option parser.
+class OptionParser
+    def initialize()
+        self.options = {}
+        self.banner_text = "Usage:"
+        self.program = ""
+    end
+
+    def new()
+        return OptionParser.new()
+    end
+
+    def banner(text)
+        self.banner_text = text
+        return self
+    end
+
+    def separator(text = "")
+        self.separator_text = text
+        return self
+    end
+
+    def version(text)
+        self.version_text = text
+        return self
+    end
+
+    def program_name(text)
+        self.program = text
+        return self
+    end
+
+    def on(name, description = "", default = nil)
+        self.options.set(name, {description: description, default: default})
+        return self
+    end
+
+    def parse(arguments = ARGV)
+        result = {}
+        for key in self.options.keys()
+            result.set(key, self.options.get(key).get("default"))
+        end
+        i = 0
+        while i < arguments.length()
+            item = arguments[i]
+            if item.starts_with("--")
+                key = item.slice(2)
+                if self.options.has(key)
+                    spec = self.options.get(key)
+                    if spec.get("default") == true or spec.get("default") == false
+                        result.set(key, true)
+                    else if i + 1 < arguments.length()
+                        i += 1
+                        result.set(key, arguments[i])
+                    end
+                end
+            end
+            i += 1
+        end
+        return result
+    end
+
+    def parse!(arguments = ARGV)
+        return self.parse(arguments)
+    end
+
+    def help()
+        text = self.banner_text + "\n"
+        for key in self.options.keys()
+            text += "  --" + key + "  " + self.options.get(key).get("description") + "\n"
+        end
+        return text
+    end
+
+    def summarize()
+        return self.help()
+    end
+
+    def abort(message)
+        throw "OptionParserError: " + message
+    end
+end
+
+option_parser = OptionParser.new()
+
+# Small structured logger with Ruby-inspired levels.
+class Logger
+    def initialize(output = nil, level = 0)
+        self.output = output
+        self.level_value = level
+    end
+
+    def new(output = nil, level = 0)
+        return Logger.new(output, level)
+    end
+
+    def level()
+        return self.level_value
+    end
+
+    def set_level(value)
+        self.level_value = value
+        return value
+    end
+
+    def level_set(value)
+        return self.set_level(value)
+    end
+
+    def add(level, message)
+        if level < self.level_value
+            return false
+        end
+        line = str(message)
+        if self.output != nil
+            return self.output.write(line + "\n")
+        end
+        return print(line)
+    end
+
+    def log(level, message)
+        return self.add(level, message)
+    end
+
+    def debug(message)
+        return self.add(0, "DEBUG: " + message)
+    end
+
+    def info(message)
+        return self.add(1, "INFO: " + message)
+    end
+
+    def warn(message)
+        return self.add(2, "WARN: " + message)
+    end
+
+    def error(message)
+        return self.add(3, "ERROR: " + message)
+    end
+
+    def fatal(message)
+        return self.add(4, "FATAL: " + message)
+    end
+
+    def debug?()
+        return self.level_value <= 0
+    end
+
+    def info?()
+        return self.level_value <= 1
+    end
+
+    def warn?()
+        return self.level_value <= 2
+    end
+
+    def error?()
+        return self.level_value <= 3
+    end
+
+    def fatal?()
+        return self.level_value <= 4
+    end
+end
+
+logger = Logger.new()
+
+# Benchmark helpers.
+class Benchmark
+    def realtime(command)
+        return __benchmark_realtime(command)
+    end
+
+    def measure(command)
+        return self.realtime(command)
+    end
+end
+
+benchmark = Benchmark.new()
+
+# Timeout facade. Cooperative timeout requires a callable runtime scheduler.
+class Timeout
+    def timeout(seconds, callback)
+        start = millis()
+        result = callback()
+        if millis() - start > seconds * 1000
+            throw "TimeoutError: operation exceeded timeout"
+        end
+        return result
+    end
+end
+
+timeout = Timeout.new()
+
+# Lightweight ERB-style template engine using {{ expression }} placeholders.
+class ERB
+    def initialize(template)
+        self.template = template
+    end
+
+    def src()
+        return self.template
+    end
+
+    def result(values = {})
+        output = self.template
+        for key in values.keys()
+            output = output.replace("{{" + key + "}}", str(values.get(key)))
+        end
+        return output
+    end
+
+    def run(values = {})
+        return self.result(values)
+    end
+end
+
+erb = ERB.new("")
+
+# Flat public application API.
+def parser(); return OptionParser.new(); end
+def logger(output = nil, level = 0); return Logger.new(output, level); end
+def benchmark(); return Benchmark.new(); end
+def timeout(); return Timeout.new(); end
+def template(source); return ERB.new(source); end
+

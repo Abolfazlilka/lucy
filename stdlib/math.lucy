@@ -109,3 +109,40 @@ class Math
 end
 
 math = Math.new()
+
+# Flat public math API.
+def _math_abs(x); return x.abs(); end
+def _math_sqrt(x); return x.sqrt(); end
+def _math_pow(x, y); return x.pow(y); end
+def _math_sin(x); return x.sin(); end
+def _math_cos(x); return x.cos(); end
+def _math_tan(x); return x.tan(); end
+def _math_floor(x); return x.floor(); end
+def _math_ceil(x); return x.ceil(); end
+def _math_log(x); return x.log(); end
+def _math_log10(x); return x.log() / 2.302585092994046; end
+def _math_exp(x); return __math_exp(x); end
+def square(x); return x * x; end
+def cube(x); return x * x * x; end
+def clamp(x, low, high); if x < low; return low; else if x > high; return high; end; return x; end
+def even(x); return x % 2 == 0; end
+def odd(x); return x % 2 != 0; end
+def abs(x); return _math_abs(x); end
+def sqrt(x); return _math_sqrt(x); end
+def pow(x, y); return _math_pow(x, y); end
+def sin(x); return _math_sin(x); end
+def cos(x); return _math_cos(x); end
+def tan(x); return _math_tan(x); end
+def floor(x); return _math_floor(x); end
+def ceil(x); return _math_ceil(x); end
+def log(x); return _math_log(x); end
+def log10(x); return _math_log10(x); end
+def exp(x); return _math_exp(x); end
+def min(a, b); if a < b; return a; end; return b; end
+def max(a, b); if a > b; return a; end; return b; end
+def factorial(n); return Math.new().factorial(n); end
+def gcd(a, b); return Math.new().gcd(a, b); end
+def lcm(a, b); return Math.new().lcm(a, b); end
+def average(values); return Math.new().average(values); end
+def pi(); return 3.141592653589793; end
+def e(); return 2.718281828459045; end
