@@ -1,19 +1,7 @@
-# Mathematical helpers and convenience functions.
-#
-# Usage:
-#   import math
-#   print math.sqrt(16)
-#
-# Notes:
-#   - All angles are in radians.
-#   - Invalid input returns nan instead of stopping the program.
-#   - Every method is called through `self.` inside this class,
-#     constants (pi, e, inf, nan, ...) are used by their bare name.
-
+# math helpers, use it like: import math, then math.sqrt(16)
+# angles are in radians and bad input gives nan instead of crashing
 class Math
-    # ---------------------------------------------------------------
     # constants
-    # ---------------------------------------------------------------
     const pi      = 3.141592653589793
     const e       = 2.718281828459045
     const tau     = 6.283185307179586
@@ -27,17 +15,14 @@ class Math
     const neg_inf = -1.0 / 0.0
     const nan     = 0.0 / 0.0
 
-    # 2^52: at or above this every float is already a whole number
-    # (also keeps int() away from values that do not fit an integer).
+    # above 2^52 every float is already whole, so we skip int() there
     const max_safe_int = 4503599627370496.0
 
     def initialize()
         self.random_seed = 1
     end
 
-    # ---------------------------------------------------------------
     # basic
-    # ---------------------------------------------------------------
     def abs(x)
         if x < 0
             return -x
@@ -45,7 +30,7 @@ class Math
         return x
     end
 
-    # Returns -1, 0 or 1 (nan for nan).
+    # -1, 0 or 1 (nan stays nan)
     def sign(x)
         if self.is_nan(x)
             return nan
@@ -104,7 +89,7 @@ class Math
         return i
     end
 
-    # Rounds half away from zero: round(2.5) = 3, round(-2.5) = -3.
+    # halves go away from zero: 2.5 -> 3, -2.5 -> -3
     def round(x)
         if x >= 0
             return self.floor(x + 0.5)
@@ -123,7 +108,7 @@ class Math
         return x - self.floor(x)
     end
 
-    # Result has the sign of b (like Ruby's %).
+    # result takes the sign of b, like ruby's %
     def mod(a, b)
         if b == 0
             return nan
@@ -131,7 +116,7 @@ class Math
         return a - b * self.floor(a / b)
     end
 
-    # Result has the sign of a (like C++'s fmod).
+    # result takes the sign of a, like c++ fmod
     def rem(a, b)
         if b == 0
             return nan
@@ -139,9 +124,7 @@ class Math
         return a % b
     end
 
-    # ---------------------------------------------------------------
     # power / roots / exponential
-    # ---------------------------------------------------------------
     def pow(base, power)
         if power == 0
             return 1
@@ -161,7 +144,7 @@ class Math
         return self.exp(power * self.ln(base))
     end
 
-    # Fast exponentiation by squaring, integer exponents only.
+    # square-and-multiply, integer powers only
     def pow_int(base, power)
         if power == 0
             return 1
@@ -196,7 +179,7 @@ class Math
             return x
         end
 
-        # Scale x into [1, 4) so Newton's method converges in a few steps.
+        # shrink x into [1, 4) so newton converges fast
         scale = 1.0
         while x >= 4
             x /= 4
@@ -225,7 +208,7 @@ class Math
             return -self.cbrt(-x)
         end
 
-        # Scale x into [1, 8).
+        # same idea, shrink x into [1, 8)
         scale = 1.0
         while x >= 8
             x /= 8
@@ -261,7 +244,7 @@ class Math
             return 0
         end
 
-        # exp(x) = 2^k * exp(r), with |r| <= ln2 / 2
+        # split into 2^k * exp(r) with a small r
         k = self.round(x / ln2)
         r = x - k * ln2
 
@@ -274,7 +257,7 @@ class Math
             i += 1
         end
 
-        # 2^k is applied in two halves so it never overflows on its own.
+        # apply 2^k in two halves so it can't overflow by itself
         half = self.floor(k / 2)
         return total * self.pow_int(2.0, half) * self.pow_int(2.0, k - half)
     end
@@ -283,7 +266,7 @@ class Math
         return self.pow(2, x)
     end
 
-    # exp(x) - 1, accurate for small x.
+    # exp(x) - 1 without losing precision near 0
     def expm1(x)
         if self.abs(x) < 0.5
             term = x
@@ -299,9 +282,7 @@ class Math
         return self.exp(x) - 1
     end
 
-    # ---------------------------------------------------------------
     # logarithms
-    # ---------------------------------------------------------------
     def ln(x)
         if self.is_nan(x) || x < 0
             return nan
@@ -313,7 +294,7 @@ class Math
             return inf
         end
 
-        # Bring x into [1/sqrt2, sqrt2] and remember the power of two.
+        # pull x into [1/sqrt2, sqrt2], count the powers of two
         k = 0
         while x > sqrt2
             x /= 2
@@ -324,7 +305,7 @@ class Math
             k -= 1
         end
 
-        # ln(x) = 2 * (z + z^3/3 + z^5/5 + ...)  where z = (x - 1) / (x + 1)
+        # ln(x) = 2 * (z + z^3/3 + z^5/5 + ...), z = (x - 1) / (x + 1)
         z = (x - 1) / (x + 1)
         z_squared = z * z
         term = z
@@ -365,7 +346,7 @@ class Math
         return self.ln(x) / ln10
     end
 
-    # ln(1 + x), accurate for small x.
+    # ln(1 + x) without losing precision near 0
     def log1p(x)
         if x < -1
             return nan
@@ -391,15 +372,13 @@ class Math
         return self.ln(1 + x)
     end
 
-    # ---------------------------------------------------------------
-    # trigonometry (radians)
-    # ---------------------------------------------------------------
+    # trigonometry
     def sin(x)
         if !self.is_finite(x)
             return nan
         end
 
-        # bring x into [-pi, pi]
+        # wrap x into [-pi, pi]
         x = x - tau * self.floor(x / tau + 0.5)
 
         x2 = x * x
@@ -420,7 +399,7 @@ class Math
             return nan
         end
 
-        # bring x into [-pi, pi]
+        # wrap x into [-pi, pi]
         x = x - tau * self.floor(x / tau + 0.5)
 
         x2 = x * x
@@ -464,7 +443,7 @@ class Math
             return pi / 2 - self.arctan(1 / x)
         end
 
-        # For x in (0.5, 1]: atan(x) = pi/4 + atan((x - 1) / (x + 1))
+        # for x in (0.5, 1]: atan(x) = pi/4 + atan((x - 1) / (x + 1))
         offset = 0
         if x > 0.5
             offset = pi / 4
@@ -531,9 +510,7 @@ class Math
         return nan
     end
 
-    # ---------------------------------------------------------------
     # hyperbolic
-    # ---------------------------------------------------------------
     def sinh(x)
         return (self.expm1(x) - self.expm1(-x)) / 2
     end
@@ -566,9 +543,7 @@ class Math
         return self.ln(x + self.sqrt(x - 1) * self.sqrt(x + 1))
     end
 
-    # ---------------------------------------------------------------
-    # aliases (C++ style names)
-    # ---------------------------------------------------------------
+    # aliases
     def atan(x)
         return self.arctan(x)
     end
@@ -593,9 +568,7 @@ class Math
         return self.arccosh(x)
     end
 
-    # ---------------------------------------------------------------
     # checks
-    # ---------------------------------------------------------------
     def is_nan(x)
         return x != x
     end
@@ -622,13 +595,11 @@ class Math
         if x == 0
             return false
         end
-        # smallest normal double = 2^-1022
+        # smallest normal double is 2^-1022
         return self.abs(x) >= 1.0 / self.pow_int(2.0, 1022)
     end
 
-    # ---------------------------------------------------------------
     # angle conversion
-    # ---------------------------------------------------------------
     def to_radians(deg)
         return deg * pi / 180
     end
@@ -637,9 +608,7 @@ class Math
         return rad * 180 / pi
     end
 
-    # ---------------------------------------------------------------
     # integer helpers
-    # ---------------------------------------------------------------
     def gcd(a, b)
         a = self.abs(a)
         b = self.abs(b)
@@ -655,7 +624,7 @@ class Math
         if a == 0 || b == 0
             return 0
         end
-        # divide first so the intermediate value stays small
+        # divide first so the number stays small
         return self.abs(int(a / self.gcd(a, b)) * b)
     end
 
@@ -707,9 +676,7 @@ class Math
         return candidate
     end
 
-    # ---------------------------------------------------------------
     # combinatorics
-    # ---------------------------------------------------------------
     def comb(n, k)
         if k < 0 || k > n
             return 0
@@ -743,9 +710,7 @@ class Math
         return result
     end
 
-    # ---------------------------------------------------------------
     # statistics
-    # ---------------------------------------------------------------
     def sum(list)
         result = 0
         for item in list
@@ -761,7 +726,7 @@ class Math
         return self.sum(list) * 1.0 / list.length()
     end
 
-    # Smallest item of a list (see min(a, b) for two numbers).
+    # smallest item of a list (min(a, b) is for two numbers)
     def min_of(list)
         if list.length() == 0
             return nan
@@ -777,7 +742,7 @@ class Math
         return result
     end
 
-    # Largest item of a list (see max(a, b) for two numbers).
+    # biggest item of a list (max(a, b) is for two numbers)
     def max_of(list)
         if list.length() == 0
             return nan
@@ -793,7 +758,7 @@ class Math
         return result
     end
 
-    # Returns a new sorted copy (insertion sort), the original is untouched.
+    # sorted copy via insertion sort, original stays as is
     def sorted(list)
         arr = []
         for item in list
@@ -831,7 +796,7 @@ class Math
         return (arr[mid - 1] + arr[mid]) / 2.0
     end
 
-    # Population variance.
+    # population variance (divides by n)
     def variance(list)
         if list.length() == 0
             return nan
@@ -851,20 +816,18 @@ class Math
         return self.sqrt(self.variance(list))
     end
 
-    # ---------------------------------------------------------------
-    # random (simple seeded generator, not for security use)
-    # ---------------------------------------------------------------
+    # random
     def seed(value)
         self.random_seed = self.abs(int(value)) % 2147483648
     end
 
-    # Float in [0, 1).
+    # float in [0, 1)
     def random()
         self.random_seed = (self.random_seed * 1103515245 + 12345) % 2147483648
         return self.random_seed / 2147483648.0
     end
 
-    # Integer in [low, high], both ends included.
+    # integer in [low, high], both ends included
     def rand_int(low, high)
         if high < low
             return nan
@@ -872,7 +835,7 @@ class Math
         return low + self.floor(self.random() * (high - low + 1))
     end
 
-    # Float in [low, high).
+    # float in [low, high)
     def rand_float(low, high)
         return low + self.random() * (high - low)
     end
@@ -886,7 +849,7 @@ class Math
         return list[index]
     end
 
-    # Returns a shuffled copy (Fisher-Yates), the original is untouched.
+    # shuffled copy (fisher-yates), original stays as is
     def shuffle(list)
         arr = []
         for item in list
@@ -905,9 +868,7 @@ class Math
         return arr
     end
 
-    # ---------------------------------------------------------------
     # geometry / vectors
-    # ---------------------------------------------------------------
     def distance(x1, y1, x2, y2)
         return self.hypot(x2 - x1, y2 - y1)
     end
@@ -959,7 +920,7 @@ class Math
         ]
     end
 
-    # Length (magnitude) of a vector.
+    # vector length
     def length(v)
         return self.sqrt(self.dot(v, v))
     end
