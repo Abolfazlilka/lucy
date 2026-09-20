@@ -239,3 +239,10 @@ print math.normalize([3, 4])                  # [0.6, 0.8]
 - Every method is called through `self.` inside the `Math` class. Constants are used by their bare name.
 - New functions should follow the same rules: return `nan` for invalid input and never modify the arrays they receive.
 - The algorithms are pure Lucy (Newton's method and Taylor series with range reduction), so results can differ from the host C library in the last digits.
+
+
+---
+ 
+# Author
+ 
+Developed by **Abolfazlilka**.
